@@ -1315,3 +1315,29 @@ Das Programm ist online: **<https://ol-karten-prep.web.app>**. Dort liegt die Pr
 **Neue Regel in `CLAUDE.md`:** Firebase Hosting veröffentlicht den Ordner `documentation/`, außer Markdown- und Office-Dateien.
 
 **Offen:** Budget-Warnung im Zahlungskonto (habe ich nicht geprüft). Als Nächstes die Website mit Kartenauswahl.
+
+---
+
+## 37 · 2026-11-15 · Projektübersicht: API-Beschreibung durch Link ersetzt, Checkliste ergänzt
+
+### Prompt
+
+> Die Buget-Warnung ist eingerichtet.
+> Prüfe, ob das Überblicks-HTML am aktuellen Stand ist.
+> Entferne die derzeit direkt im HTML liegende API Beschreibung; der Link nach https://ol-karten-prep.web.app/api/docs ist ausreichend.
+>
+> Ergänze folgende Schritte in die Checkliste:
+> * Erstellen eines Service-Logs, in dem bei jedem Aufruf die Caller-ID (z.B. IP-Adresse), der Maßstab, und alle anderen Angaben aus dem API-Aufruf gespeichert werden. Log-Analyse überlegen wir uns dann später.
+> * Ändern des Lizenz-Textes
+
+### Ergebnis
+
+**Projektübersicht** (lokal und online unter <https://ol-karten-prep.web.app>):
+- Die ausführliche API-Beschreibung ist entfernt, ebenso die Stilregeln, die nur sie brauchte. Stattdessen gibt es eine kurze Erklärung und eine Karte mit dem Link zur API-Doku. Die API-Doku wird aus dem Programmcode erzeugt und ist deshalb immer aktuell.
+- Veraltet war der Satz „Aufträge laufen nacheinander“, das gilt nur lokal. Jetzt steht dort: höchstens drei Aufträge gleichzeitig, fertige Karten werden nach einem Tag gelöscht.
+- Checkliste: „Service-Log erstellen …“ und „Lizenztext ändern“ als offene Punkte nach „Projekt online verfügbar machen“.
+- Der Rest war aktuell: Infografik, GitHub-Links, Stand-Datum und die übrigen Punkte der Checkliste.
+
+**`project.md`:** Budget-Warnung als eingerichtet vermerkt. Die zwei neuen Aufgaben stehen als Schritte 9 und 10 unter „Nächste Schritte“.
+- **Hinweis zum Service-Log:** Eine IP-Adresse ist nach DSGVO ein personenbezogenes Datum. Vor dem Einbau sollten Zweck, Aufbewahrungsdauer (z. B. 30 Tage) und ein Hinweis auf der Website festgelegt werden.
+- **Rückfrage zum Lizenztext:** Gemeint ist entweder der Lizenzhinweis in `QUELLEN.txt` bzw. in den Kartennotizen, die Lizenz des Projekts (GPL-3.0) oder der Hinweis auf der Projektübersicht.

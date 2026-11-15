@@ -363,7 +363,7 @@ LICENSE             GPL-3.0
 .gitignore, .gitattributes   was nicht ins Repository kommt; Zeilenenden LF
 documentation/      project.md (diese Datei), omap-format.md, datenquellen.md,
                     unterhaltung.md (Lab Notebook), projektuebersicht.html (Projektseite:
-                    Infografik, API, Links, Checkliste; eigenständig ohne externe
+                    Infografik, Link zur API-Doku, GitHub-Links, Checkliste; eigenständig ohne externe
                     Dateien, lokal per Doppelklick, später auf Firebase Hosting; nicht auf
                     claude.ai veröffentlichen)
 data/               Eingangs- und Referenzdaten (nicht vom Programm erzeugt)
@@ -595,6 +595,14 @@ Testkarten stammen noch aus der Zeit vor der Auflösung nach Maßstab.
    die Importe) und das Lesen der Job-Beschreibung (`run.jobs.get`) ohne Berechtigung.
 8. **Website** ← nächster Schritt (Leaflet: Bereich wählen mit A3-Rahmen, Einstellungen, Fortschritt, Download).
    Lizenzhinweis (CC BY 4.0 / ODbL, Quellen müssen auf die Karte) gut sichtbar anzeigen.
+9. **Service-Log** (Vorgabe 2026-11-15): bei jedem Aufruf die Caller-ID (z. B. IP-Adresse), den
+   Maßstab und alle anderen Angaben aus dem API-Aufruf speichern; Auswertung später.
+   Datenschutz beachten: Eine IP-Adresse ist nach DSGVO ein personenbezogenes Datum. Vorher
+   festlegen: Zweck, Aufbewahrungsdauer (z. B. 30 Tage, danach löschen oder IP kürzen) und ein
+   Hinweis auf der Website (Datenschutzerklärung).
+10. **Lizenztext ändern** (Vorgabe 2026-11-15). Noch zu klären, welcher Text gemeint ist:
+    Lizenzhinweis in `QUELLEN.txt`/Kartennotizen, Lizenz des Projekts (GPL-3.0) oder Hinweis
+    auf der Projektübersicht.
 
 ## Offene Fragen
 
@@ -604,8 +612,7 @@ Testkarten stammen noch aus der Zeit vor der Auflösung nach Maßstab.
 - Lokale API: Alte Aufträge werden nicht gelöscht (`output/api/` wächst; bei Bedarf von Hand
   löschen). In der Cloud löscht Cloud Storage die ZIPs nach 1 Tag. Die Einträge in Firestore
   bleiben (wenige Bytes je Auftrag), bei Bedarf später eine Aufbewahrungsregel (TTL) einrichten.
-- Budget-Warnung im Google-Cloud-Zahlungskonto: vom Benutzer einzurichten (z. B. 10 €/Monat),
-  Stand 2026-11-15 nicht geprüft.
+- Budget-Warnung im Google-Cloud-Zahlungskonto: vom Benutzer eingerichtet (2026-11-15).
 - Der Testclient von FastAPI meldet, dass `httpx` dort veraltet ist und `httpx2` erwartet
   wird (Hinweis, Tests laufen). Umstellen, sobald das Paket geprüft ist.
 - Overpass war am 2026-11-02 meist gestört. Für eine öffentliche Website mit vielen
