@@ -230,7 +230,8 @@ JPG + `.jgw` gespeichert, als Koordinatensystem dient der GK-Streifen der Karten
     <https://github.com/retofritze/OL-Karten-prep> (**öffentlich seit 2026-11-15**, Branch
     `main`). Vor dem Veröffentlichen geprüft: keine Passwörter oder Schlüssel; lokale Pfade mit
     Benutzernamen entfernt; die Versionsgeschichte (7 Commits ab 2026-11-14) durch einen
-    einzigen bereinigten Commit ersetzt. In Doku und Lab Notebook künftig keine lokalen Pfade
+    einzigen bereinigten Commit ersetzt (alte Commits bleiben über ihre Kennung abrufbar, bis
+    GitHub aufräumt; endgültig entfernen nur über den GitHub-Support). In Doku und Lab Notebook künftig keine lokalen Pfade
     mit Benutzernamen (`C:\Users\<Benutzer>\…` schreiben). Lizenz **GPL-3.0** (`LICENSE`). Commits mit der anonymen GitHub-Adresse
     `355008406+retofritze@users.noreply.github.com` (nur im Repository eingestellt, nicht global).
     Zeilenenden: LF (`.gitattributes`). Nicht im Repository: `.venv`, `cache/`, `output/`,

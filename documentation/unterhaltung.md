@@ -1168,3 +1168,9 @@ Bestandsaufnahme: Node.js, Firebase-CLI, Google-Cloud-CLI (`gcloud`) und Docker 
 - **Laufzeit:** geschätzt 5–20 Minuten, vor allem wegen der Downloads. Für Cloud Tasks ist das knapp (höchstens 30 Minuten pro Aufruf). Deshalb eher **Cloud Run Jobs** (ein Auftrag = ein Job-Lauf, Zeitgrenze bis zu Stunden). Prüfe ich in der aktuellen Doku.
 - **Arbeitsspeicher:** Mit geteiltem Orthofoto reichen voraussichtlich 4 GB. Ich messe das vorher lokal mit einer großen Waldkarte.
 - **Zum Format:** 8 × 8 km bei 1:10 000 ergibt 80 × 80 cm auf Papier, mehr als A1. Bei 1:15 000 sind es 53 × 53 cm. Übliche Waldkarten sind A4/A3 (bei 1:10 000 etwa 3 × 4 km). Als Obergrenze ist 8 × 8 km gut, die meisten Aufträge werden deutlich kleiner sein.
+
+**Nachtrag zur Veröffentlichung:**
+- Das Repository ist öffentlich, GitHub erkennt die Lizenz GPL-3.0, und die Seite ist ohne Anmeldung erreichbar.
+- Einzige Version auf GitHub: ein Commit „Initial commit: OL-Karten-prep“. Eine alte Commit-Kennung im Lab Notebook (Eintrag 26) wurde vorher entfernt.
+- Einschränkung: GitHub löscht die alten, nicht mehr verbundenen Commits nicht sofort. Wer ihre Kennung kennt, kann sie über die direkte Adresse noch abrufen (geprüft: HTTP 200). Die Kennungen stehen nirgends mehr im Repository. Endgültig entfernen kann sie nur der GitHub-Support (Formular „Remove data from a repository“, Stichwort „cached views / dangling commits“). Die betroffenen Angaben sind ein Autorenname in Office-Metadaten, Windows-Benutzernamen und der Name eines OneDrive-Ordners.
+- Die alte Geschichte ist nur lokal als Sicherungsdatei (Git-Bundle) im Scratchpad dieser Sitzung vorhanden, nicht im Projekt.
