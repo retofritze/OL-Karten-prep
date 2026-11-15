@@ -187,7 +187,8 @@ Seit 2026-11-15 in Schichten (project.md, Entscheidung 17), alle Pfade unter `sr
 - `ausgabe/omap.py`: `OmapDocument` lädt einen OOM-Symbolsatz, entfernt die
   Beispielobjekte, setzt Georeferenzierung, Objekte (über ISOM-Code) und
   georeferenzierte Bild-Vorlagen und speichert.
-- `quellen/orthofoto.py`: Orthofoto aus Kacheldiensten, ins Karten-Koordinatensystem umgerechnet.
+- `quellen/orthofoto.py`: Orthofoto aus Kacheldiensten, ins Karten-Koordinatensystem umgerechnet,
+  Auflösung nach Maßstab (0,025 mm pro Pixel, beim Verkleinern gemittelt; project.md Entscheidung 20).
 - `ausgabe/bilder.py`: Bild als JPG + `.jgw`. GDAL nennt die Lagedatei eines JPG `.wld`, wir
   benennen sie in `.jgw` um (in OOM bestätigte Form) und schreiben keine `.aux.xml`.
 - `quellen/gelaende.py` (BEV-DGM), `quellen/wien.py` (Wiener WFS) und

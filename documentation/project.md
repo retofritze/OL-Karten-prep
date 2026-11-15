@@ -97,8 +97,9 @@ JPG + `.jgw` gespeichert, als Koordinatensystem dient der GK-Streifen der Karten
 - **Stack**: Python 3.12 (`.venv`, je Rechner neu anlegen, siehe Wiedereinstieg), im Einsatz:
   lxml (XML), pyproj (Koordinaten), pygeomag (Deklination, WMM offline), rasterio (Raster
   lesen/umprojizieren, auch Teil-Downloads aus Cloud Optimized GeoTIFF), requests (Downloads),
-  shapely (Geometrie), contourpy (Höhenlinien), scipy (Glättung), siehe `requirements.txt`.
-  Geplant: Bereichsauswahl über eine kleine Leaflet-Weboberfläche.
+  shapely (Geometrie), contourpy (Höhenlinien), scipy (Glättung), FastAPI + uvicorn (API),
+  siehe `requirements.txt`; zum Entwickeln pytest, httpx, pyflakes (`requirements-dev.txt`).
+  Geplant: Bereichsauswahl über eine kleine Leaflet-Weboberfläche; Betrieb auf Firebase/Cloud Run.
 - **Datenquellen** (recherchiert und geprüft 2026-11-02, siehe [datenquellen.md](datenquellen.md)):
   Orthofoto Stadt Wien (WMTS) bzw. basemap.at (WMTS) für den Rest Österreichs, Höhenlinien
   Stadt Wien (WFS), BEV ALS-DGM 1 m für ganz Österreich, OpenStreetMap (Overpass / OSM-API).
@@ -107,6 +108,9 @@ JPG + `.jgw` gespeichert, als Koordinatensystem dient der GK-Streifen der Karten
 ---
 
 ## Planung (Phasen)
+
+*Dateinamen in den Phasen 1–4 beziehen sich auf den Stand vor dem Umbau vom 2026-11-15
+(z. B. `osm.py` liegt heute unter `verarbeitung/`), siehe „Projektstruktur“.*
 
 1. **Recherche & Spike**
    - ✅ `.omap`-Format analysiert und Schreiben verifiziert (2026-10-29):
@@ -160,10 +164,14 @@ JPG + `.jgw` gespeichert, als Koordinatensystem dient der GK-Streifen der Karten
      SO dunkel), in OOM bestätigt (passt zu den Höhenlinien). Das DGM wird nur einmal geladen
      und für Höhenlinien und Schummerung gemeinsam genutzt.
    - Nordlinien wurden kurz eingebaut und auf Wunsch wieder entfernt (Entscheidung 14).
-5. **Weboberfläche**: Bereich auf einer Webkarte aufziehen, Einstellungen wählen
+5. ✅ **Umbau und API** (2026-11-15): Tests, Schichten, Auftrag mit Prüfung und Fortschritt,
+   lokale API (FastAPI), A3-Grenze und Orthofoto-Auflösung nach Maßstab. Details unter
+   „Stand und nächste Schritte“.
+6. **Betrieb in der Cloud (Firebase / Cloud Run)** **← nächster Schritt**, siehe
+   „Stand und nächste Schritte“, Punkt 7.
+7. **Weboberfläche**: Bereich auf einer Webkarte aufziehen, Einstellungen wählen
    (siehe „Ablauf auf der Website“), fertigen Kartenordner als ZIP herunterladen.
-   **← nächster Schritt**
-6. **Erweiterungen**: Hangneigung als zusätzliche Vorlage, bessere Landesdaten weiterer
+8. **Erweiterungen**: Hangneigung als zusätzliche Vorlage, bessere Landesdaten weiterer
    Bundesländer, Vegetation aus LiDAR (vgl. Karttapullautin), weitere Länder, Einpassen
    alter Karten.
 
@@ -205,6 +213,8 @@ JPG + `.jgw` gespeichert, als Koordinatensystem dient der GK-Streifen der Karten
 
 9. **Orthofoto-Auflösung**: immer die beste verfügbare mit echten Details. Wien: Zoom 20
    (10 cm), Zoom 21 ist nur hochgerechnet. basemap.at: Zoom 20, wo vorhanden, sonst 19 (20 cm).
+   *Seit 2026-11-15 ersetzt durch Entscheidung 20 (Auflösung nach Maßstab); 10 cm bleibt die
+   feinste Stufe und gilt weiterhin für Sprint (1:4 000).*
 10. **Quelle Wien/NÖ**: Stadt-Wien-Orthofoto, wenn alle Kacheln des Bereichs vorhanden
     sind (Abdeckung reicht ca. 1–2 km über die Stadtgrenze), sonst basemap.at.
 11. **Datumstransformation MGI ↔ WGS84**: überall die Standardtransformation von PROJ,
@@ -239,7 +249,7 @@ JPG + `.jgw` gespeichert, als Koordinatensystem dient der GK-Streifen der Karten
     siehe datenquellen.md; ohne Orthofoto erzeugt `make_testfile.py` die Karte ohne Vorlage)
     und Office-Dateien wie die Vorlage der Infografik (`*.pptx`, `*.docx`: Metadaten enthalten
     den Namen des Autors).
-    Geplante Struktur:
+    Struktur (umgesetzt 2026-11-15, nur `web/` fehlt noch; Details unter „Projektstruktur“):
     ```
     src/olprep/
       quellen/        Daten beschaffen: Orthofoto, Geländemodell, OSM, Wien-Daten (+ Zwischenspeicher)
@@ -302,7 +312,11 @@ welche Daten es verwendet (z. B. fertige Höhenlinien oder selbst gerechnete).
 | 4 | Äquidistanz (Abstand der Höhenlinien) | `--aequidistanz` ✅ |
 | 5 | Zählkurvenabstand | `--zaehlkurve` ✅ |
 | 6 | weitere Einstellungen, die sich später ergeben: OSM ja/nein | `--kein-osm` ✅ |
-| – | Download des fertigen Kartenordners (ZIP) | |
+| – | Download des fertigen Kartenordners (ZIP) | `output/<name>.zip` ✅, API `…/ergebnis` ✅ |
+
+**Größe des Bereichs (seit 2026-11-15, Entscheidung 19):** höchstens A3 beim gewählten
+Maßstab. Die Website soll deshalb beim Aufziehen des Bereichs einen A3-Rahmen für den
+gewählten Maßstab anzeigen (hoch oder quer).
 
 **Symbolsatz und Maßstab hängen zusammen:** OOM liefert jeden Symbolsatz nur für
 bestimmte Maßstäbe mit (Stand OOM 0.9.6):
@@ -348,7 +362,7 @@ LICENSE             GPL-3.0
 .gitignore, .gitattributes   was nicht ins Repository kommt; Zeilenenden LF
 documentation/      project.md (diese Datei), omap-format.md, datenquellen.md,
                     unterhaltung.md (Lab Notebook), projektuebersicht.html (Projektseite:
-                    Infografik, API-Entwurf, Links, Checkliste; eigenständig ohne externe
+                    Infografik, API, Links, Checkliste; eigenständig ohne externe
                     Dateien, lokal per Doppelklick, später auf Firebase Hosting; nicht auf
                     claude.ai veröffentlichen)
 data/               Eingangs- und Referenzdaten (nicht vom Programm erzeugt)
@@ -480,13 +494,18 @@ Erwartete Ausgabe: Grid-Faktor 1.000005; Deklination/Grivation hängen vom Tag a
 am 2026-10-29 5.38°/5.32°, ab 2026-11-01 5.39°/5.33°. Die Datei öffnet in OOM 0.9.6
 ohne Warnung, der Kreis liegt mittig ums Stadion (bestätigt 2026-10-29).
 
-## Stand und nächste Schritte (2026-11-10, vor dem Umzug aus OneDrive)
+## Stand und nächste Schritte (2026-11-15)
 
 **Fertig und in OOM bestätigt:** Phasen 1–4. Das Kommandozeilenprogramm erzeugt für einen
-Bereich in ganz Österreich einen Kartenordner mit Georeferenzierung und Deklination,
-Orthofoto (beste echte Auflösung), Höhenlinien und Zählkurven (Wien fertig, sonst aus dem
-BEV-DGM), Schummerung, OSM-Objekten mit Symbolzuordnung und Tags sowie Quellen- und
-Lizenzhinweisen (Kartennotizen und `QUELLEN.txt`).
+Bereich in ganz Österreich (höchstens A3 beim gewählten Maßstab) einen Kartenordner mit
+Georeferenzierung und Deklination, Orthofoto (Auflösung nach Maßstab, Entscheidung 20),
+Höhenlinien und Zählkurven (Wien fertig, sonst aus dem BEV-DGM), Schummerung, OSM-Objekten
+mit Symbolzuordnung und Tags sowie Quellen- und Lizenzhinweisen (Kartennotizen und
+`QUELLEN.txt`), dazu ein ZIP des Ordners.
+
+**Fertig seit 2026-11-15 (Phase 5):** Code in Schichten mit 88 schnellen Tests und einem
+Referenzkarten-Test, Auftrag mit Prüfung und Fortschritt, lokale API, öffentliches
+GitHub-Repository. Orthofoto-Auflösung nach Maßstab vom Benutzer bestätigt („passt so“).
 
 **Ganz Österreich (getestet 2026-11-02):** Orthofoto (basemap.at), Geländemodell (BEV) und
 OSM decken ganz Österreich ab, die Wahl des GK-Streifens ebenso. Testkarte
@@ -496,9 +515,13 @@ Extras (10-cm-Orthofoto, fertige Höhenlinien).
 
 **Testkarten** in `output/`: `stadion` (Wien, 1:4000), `stadion_2m` (Wien, fertige
 Höhenlinien 2 m), `waidhofen_ybbs` (NÖ West, M31, 1:10000), `innsbruck_hungerburg` (Tirol,
-M28, 1:10000), `test_stadion` (Formattest von Phase 1).
+M28, 1:10000), `test_stadion` (Formattest von Phase 1). Seit 2026-11-15 zusätzlich
+`wald_a3_10000` (Waidhofen, volles A3 bei 1:10 000, 25 cm), `mtbo_a3_20000` (volles A3 bei
+1:20 000, 50 cm, ohne OSM), `vergleich_wien_10cm` / `vergleich_wien_25cm` (Schwarzenbergpark,
+1 × 1 km, Vergleich der Auflösungen) und `api/` (Ergebnisse der lokalen API). Die älteren
+Testkarten stammen noch aus der Zeit vor der Auflösung nach Maßstab.
 
-**Nächste Schritte (Stand 2026-11-10):**
+**Nächste Schritte (Stand 2026-11-15):**
 1. ✅ Projektordner aus OneDrive verschoben, `.venv` neu angelegt, Testlauf ok (2026-11-10).
 2. ✅ Git 2.56.0 und GitHub-CLI 2.103.3 installiert (`winget install --id Git.Git`,
    `winget install --id GitHub.cli`, 2026-11-10), Anmeldung als `retofritze` (2026-11-14).
@@ -519,16 +542,29 @@ M28, 1:10000), `test_stadion` (Formattest von Phase 1).
    einem Hintergrund-Thread (wartende zeigen „wartend“); Status im Arbeitsspeicher (geht beim
    Neustart verloren), Ergebnisse in `output/api/<id>/`. 13 API-Tests mit Ersatz-Ablauf ohne
    Download; ein echter Auftrag über den Server getestet (Stadion, 62 s, davon 48 s Overpass).
-   ⏳ Danach: Website, dann Firebase (Entscheidung 18): Status → Firestore, ZIPs → Cloud Storage.
-7. Für die Website: Lizenzhinweis (CC BY 4.0 / ODbL, Quellen müssen auf die Karte) gut sichtbar anzeigen.
+   Seit 2026-11-15 außerdem A3-Grenze und Orthofoto-Auflösung nach Maßstab (Entscheidungen 19–21).
+7. ⏳ **Firebase / Cloud Run** (Entscheidungen 18, 21–23; vom Benutzer vorgezogen vor die Website):
+   - ✅ Werkzeuge installiert (2026-11-15): Node.js, Firebase-CLI, Google Cloud SDK.
+   - ⏳ Vom Benutzer: Anmeldung (`firebase login`, `gcloud auth login`), Projekt-ID,
+     Tarif Blaze mit Budget-Warnung.
+   - Code: OOM-Symbolsätze und `.crt`-Tabellen mitliefern; Auftragsstatus in Firestore,
+     ZIPs in Cloud Storage (automatisch löschen nach z. B. 1 Tag); Ausführung der Aufträge
+     so, dass Cloud Run nicht drosselt und die 60-s-Grenze von Firebase Hosting nicht greift
+     (voraussichtlich Cloud Run Jobs, in der aktuellen Doku prüfen); in der Cloud nur Overpass
+     (keine OSM-API als Ersatz); `/tmp` liegt im Arbeitsspeicher → nach jedem Auftrag aufräumen;
+     User-Agent mit Link zum öffentlichen GitHub-Repository; `Dockerfile`, `firebase.json`
+     (Hosting zeigt die Projektübersicht, `/api/**` → Cloud Run); Cloud Run 4 GB, `europe-west1`.
+   - Vor dem ersten Hochladen den Benutzer fragen.
+8. **Website** (Leaflet: Bereich wählen mit A3-Rahmen, Einstellungen, Fortschritt, Download).
+   Lizenzhinweis (CC BY 4.0 / ODbL, Quellen müssen auf die Karte) gut sichtbar anzeigen.
 
 ## Offene Fragen
 
 - Höhenbezug: Fertige Wiener Linien liegen auf ganzen Metern über Wiener Null, selbst
   gerechnete auf Vielfachen der Äquidistanz über Adria (EVRF2000, im Mittel 0,5 m unter
   den Wiener Höhen). Für die Kartenform egal. Höhenzahlen an Zählkurven später ggf. angleichen.
-- Bei großen Waldkarten wird das Orthofoto groß (1 km² ≈ 20 MB bei 10 cm, ≈ 9 MB bei
-  20 cm). Ab wann OOM langsam wird, im Test beobachten.
+- Ein volles A3-Orthofoto hat 16 800 × 11 880 Pixel (ca. 40 MB JPG). Ob OOM damit flüssig
+  läuft, mit `output/wald_a3_10000` prüfen.
 - API: Alte Aufträge und ihre Dateien werden noch nicht gelöscht (`output/api/` wächst).
   Mit Cloud Storage über eine Aufbewahrungsregel lösen (z. B. 1 Tag).
 - Der Testclient von FastAPI meldet, dass `httpx` dort veraltet ist und `httpx2` erwartet

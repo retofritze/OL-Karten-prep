@@ -31,7 +31,9 @@ Alle Quellen sind kostenlos und unter CC BY 4.0 nutzbar. Die Namensnennung gehö
   - Pixelgröße in Wien (48,2° N): Zoom 19 ≈ 0,20 m, Zoom 20 ≈ 0,10 m, Zoom 21 ≈ 0,05 m.
   - **Zoom 21 bringt kaum echte Details (geprüft):** Gegenüber der hochskalierten Zoom-20-Kachel
     weicht Zoom 21 im Mittel nur um 4,0 Grauwerte ab, Zoom 20 gegenüber Zoom 19 um 9,7.
-    Zoom 21 ist also großteils hochgerechnet, bei vierfacher Datenmenge. **Wir nehmen Zoom 20 (10 cm).**
+    Zoom 21 ist also großteils hochgerechnet, bei vierfacher Datenmenge. **Wir nehmen höchstens Zoom 20 (10 cm).**
+    Seit 2026-11-15 richtet sich die Zoomstufe nach dem Maßstab (0,025 mm pro Pixel auf dem Papier,
+    project.md Entscheidung 20): Zoom 20 bei 1:4 000, Zoom 19 auf 25 cm verkleinert bei 1:10 000 usw.
   - **Abdeckung (geprüft):** Das Orthofoto reicht etwa 1–2 km über die Stadtgrenze hinaus
     (echte Bilder in Klosterneuburg, Schwechat und Perchtoldsdorf, nicht mehr in Mödling).
     Außerhalb antwortet der Server mit 404. Halbleere Randkacheln gab es im Test nicht.
@@ -51,7 +53,8 @@ Alle Quellen sind kostenlos und unter CC BY 4.0 nutzbar. Die Namensnennung gehö
   - Kachel-URL: `https://mapsneu.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{row}/{col}.jpeg`
   - Auflösung 29 cm flächendeckend, 15 cm in einzelnen Regionen. Zoom 19 gibt es überall,
     Zoom 20 nur in manchen Gebieten. Geprüft: Zoom 20 in Wien vorhanden, in Melk, Gmünd und Hollabrunn nicht,
-    in Waidhofen/Ybbs auch nicht (2026-11-15). Feiner als 10 cm ist damit nur das Wiener Orthofoto.
+    in Waidhofen/Ybbs auch nicht (2026-11-15). 10 cm gibt es damit verlässlich nur im Wiener Orthofoto,
+    sonst meist 20 cm (Zoom 19).
   - Das Flugjahr ist je Region verschieden. Es steht als Wasserzeichen in den Kacheln ab Zoom 17 und im Datensatz
     „Erfassungsstände“: <https://www.data.gv.at/datasets/8795c23b-4db6-4a01-97a2-617adbe750a2?locale=de>
   - Lizenz CC BY 4.0, Namensnennung „Datenquelle: basemap.at“ mit Link auf <https://basemap.at/>.

@@ -1250,3 +1250,29 @@ Außerdem zum Ansehen: `output/wald_a3_10000/` und `output/mtbo_a3_20000/` (voll
 **Installation:** Node.js und die Google-Cloud-CLI werden mit winget installiert. Die Installation wartet auf die Bestätigung als Administrator (Fenster der Benutzerkontensteuerung). Danach folgt die Firebase-CLI über npm.
 
 **Nachtrag Installation:** Nach der Bestätigung als Administrator sind installiert: Node.js 26.13.1, Google Cloud SDK 593.0.0 (beide mit winget) und die Firebase-CLI 15.36.0 (mit `npm install -g firebase-tools`). Als Nächstes meldet sich der Benutzer an (`firebase login`, `gcloud auth login`) und nennt die Projekt-ID.
+
+---
+
+## 35 · 2026-11-15 · Dokumentation auf den neuesten Stand gebracht
+
+### Prompt
+
+> Die Orthofotoauflösung passt so. Überprüfe nochmal, ob alle dokumentationsdateien auf dem neuesten stand sind. Ich starte VS Code jetzt neu.
+
+### Ergebnis
+
+Die Auflösung nach Maßstab ist damit bestätigt. Alle Dokumentationsdateien sind durchgesehen, veraltete Stellen korrigiert:
+
+**`project.md`:**
+- **Phasen:** Phase 5 „Umbau und API“ als erledigt eingetragen, Phase 6 „Betrieb in der Cloud“ als nächster Schritt, die Website danach (Phase 7). Hinweis, dass die Dateinamen in den Phasen 1–4 den Stand vor dem Umbau zeigen.
+- **Entscheidung 9** (immer beste Auflösung) als abgelöst durch Entscheidung 20 markiert.
+- **Stack** um FastAPI/uvicorn und die Entwicklungspakete ergänzt. „Geplante Struktur“ als umgesetzt markiert (nur `web/` fehlt).
+- **„Stand und nächste Schritte“** auf den 2026-11-15 gebracht: Testkarten ergänzt, Schritt 7 „Firebase / Cloud Run“ mit allen offenen Punkten (vom Benutzer: Anmeldung, Projekt-ID, Blaze; Code: Symbolsätze mitliefern, Firestore, Cloud Storage, Ausführung, Overpass, Dockerfile, firebase.json). Schritt 8 Website.
+- **„Ablauf auf der Website“:** ZIP-Download erledigt. Die Website soll einen A3-Rahmen für den gewählten Maßstab zeigen.
+- **Offene Fragen:** Statt der alten Angabe zur Orthofoto-Größe jetzt: Läuft OOM mit einem vollen A3-Orthofoto (ca. 40 MB) flüssig? Zu prüfen mit `output/wald_a3_10000`.
+
+**`datenquellen.md`:** Zoomstufe nach Maßstab ergänzt. Korrigiert: Echte 10 cm gibt es verlässlich nur in Wien, sonst meist 20 cm. Vorher stand dort missverständlich „feiner als 10 cm“.
+
+**`omap-format.md`:** Beschreibung des Orthofoto-Moduls um die Auflösung nach Maßstab ergänzt.
+
+**Geprüft und aktuell:** `CLAUDE.md`, Projektübersicht (A3-Hinweis, API, Checkliste), Lab Notebook.
