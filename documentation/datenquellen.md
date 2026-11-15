@@ -159,6 +159,10 @@ bekommt einfach den Streifen ihrer Mitte. Der kleine Zusatzfehler dabei ist laut
   ohne ihre äußeren Teile. Diese lädt das Programm mit `/relation/<id>/full.json` nach.
   Bei zu vielen Knoten (Limit 50 000) teilt das Programm den Bereich in Viertel.
   Die API ist eigentlich fürs Editieren gedacht, deshalb nur als Ersatz und nur für kleine Bereiche.
+  **Auf der öffentlichen Website (Cloud) gibt es diesen Ersatzweg nicht** (`OLPREP_OSM_API_ERSATZ=0`):
+  Ist Overpass gestört, endet der Auftrag mit einer verständlichen Meldung.
+- **User-Agent** aller Downloads (seit 2026-11-15): `OL-Karten-prep/0.1 (+https://github.com/retofritze/OL-Karten-prep)`,
+  wie es Overpass und OSM für automatische Zugriffe verlangen (Kontakt über das öffentliche Repository).
 - Rohdaten bleiben im Ergebnisordner unter `daten/osm.json`.
 - Lizenz ODbL, Namensnennung „© OpenStreetMap-Mitwirkende“.
 

@@ -1276,3 +1276,42 @@ Die Auflösung nach Maßstab ist damit bestätigt. Alle Dokumentationsdateien si
 **`omap-format.md`:** Beschreibung des Orthofoto-Moduls um die Auflösung nach Maßstab ergänzt.
 
 **Geprüft und aktuell:** `CLAUDE.md`, Projektübersicht (A3-Hinweis, API, Checkliste), Lab Notebook.
+
+---
+
+## 36 · 2026-11-15 · Programm läuft in Firebase / Cloud Run
+
+### Prompt
+
+> Die Projekt-ID ist ol-karten-prep. OOM läuft auch mit der großen Karte flüssig. Starte jetzt das deployment nach firebase.
+
+### Ergebnis
+
+Das Programm ist online: **<https://ol-karten-prep.web.app>**. Dort liegt die Projektübersicht, die API unter `/api/v1/…` und ihre Doku zum Ausprobieren unter `/api/docs`.
+
+**Getestet über die öffentliche Adresse:** Ein echter Auftrag (Stadion, 1:4 000) lief in 72 Sekunden durch, mit Fortschrittsanzeige. Der Download leitet auf Cloud Storage weiter, das ZIP enthält die vollständige Karte mit derselben Orthofoto-Datei wie lokal. Eine ungültige Eingabe ergibt eine verständliche Fehlermeldung (422). Lab Notebook und PowerPoint-Datei sind nicht abrufbar.
+
+**Aufbau** (vorher in der aktuellen Google-Doku geprüft):
+- **Firebase Hosting** zeigt die Projektübersicht und leitet `/api/**` an Cloud Run weiter. Hosting bricht Anfragen nach 60 Sekunden ab, deshalb läuft die Kartenerstellung nicht in der Anfrage.
+- **Cloud Run Service `olprep-api`**: nimmt Aufträge an, speichert sie in **Firestore**, startet je Auftrag einen **Cloud Run Job** und antwortet sofort. Höchstens 3 Aufträge gleichzeitig.
+- **Cloud Run Job `olprep-auftrag`** (4 GB): baut die Karte, meldet den Fortschritt an Firestore und legt das ZIP in **Cloud Storage** ab. Dort wird es nach einem Tag gelöscht.
+- Download über einen signierten Link, eine Stunde gültig. Die Daten bleiben privat.
+- Ein eigenes Dienstkonto mit nur den nötigen Rechten. Browser haben keinen direkten Zugriff auf Firestore.
+
+**Code-Änderungen:**
+- Die OOM-Symbolsätze und Zuordnungstabellen werden mitgeliefert (2,9 MB, GPL-3.0).
+- In der Cloud nur Overpass, ohne Ersatzweg über die OSM-API.
+- Downloads weisen sich mit dem Link zum GitHub-Repository aus.
+- Fehlermeldungen ohne interne Details.
+- Container mit genau den lokal getesteten Versionen.
+- 12 neue Tests mit Attrappen für die Google-Dienste, insgesamt 100.
+
+**Hochladen:** `deploy\einrichten.ps1` (einmalig, erledigt) und `deploy\hochladen.ps1` (je neue Version, nach Tests und Commit).
+
+**Zwei Fehler beim ersten Hochladen, beide behoben:**
+1. Der Container startete nicht, weil die Systembibliothek `libexpat` für rasterio fehlte. Der Build prüft jetzt alle Importe, damit so etwas schon beim Bauen auffällt.
+2. Der Job ließ sich nicht starten, weil mein Code die Job-Beschreibung lesen wollte, wofür das Dienstkonto kein Recht hat. Das Lesen war überflüssig und ist entfernt.
+
+**Neue Regel in `CLAUDE.md`:** Firebase Hosting veröffentlicht den Ordner `documentation/`, außer Markdown- und Office-Dateien.
+
+**Offen:** Budget-Warnung im Zahlungskonto (habe ich nicht geprüft). Als Nächstes die Website mit Kartenauswahl.

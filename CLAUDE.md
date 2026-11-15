@@ -32,6 +32,14 @@ also auch im Lab Notebook: keine lokalen Pfade mit Benutzernamen (`C:\Users\<Ben
 schreiben), keine Namen, E-Mail-Adressen oder Zugangsdaten. Office-Dateien (`*.pptx`, `*.docx`)
 sind in `.gitignore`, weil ihre Metadaten den Autor enthalten.
 
+## Cloud (Firebase / Cloud Run)
+
+- Online unter <https://ol-karten-prep.web.app> (Aufbau: `project.md` → „Betrieb in der Cloud“).
+- **Firebase Hosting veröffentlicht den Ordner `documentation/`** (ohne `*.md` und Office-Dateien).
+  Dort keine Dateien ablegen, die nicht öffentlich sein sollen.
+- Neue Version: Tests, Commit, dann `powershell -ExecutionPolicy Bypass -File deploy\hochladen.ps1`.
+  Nur die Projektübersicht geändert: `firebase deploy --only hosting`.
+
 ## Testkarten und OOM
 
 Der Benutzer prüft die erzeugten Karten laufend in OOM. **Bevor ein Kartenordner unter `output/` gelöscht oder neu erzeugt wird**, prüfen, ob OOM die Karte geöffnet hat:

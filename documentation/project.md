@@ -167,8 +167,9 @@ JPG + `.jgw` gespeichert, als Koordinatensystem dient der GK-Streifen der Karten
 5. ✅ **Umbau und API** (2026-11-15): Tests, Schichten, Auftrag mit Prüfung und Fortschritt,
    lokale API (FastAPI), A3-Grenze und Orthofoto-Auflösung nach Maßstab. Details unter
    „Stand und nächste Schritte“.
-6. **Betrieb in der Cloud (Firebase / Cloud Run)** **← nächster Schritt**, siehe
-   „Stand und nächste Schritte“, Punkt 7.
+6. ✅ **Betrieb in der Cloud (Firebase / Cloud Run)** (2026-11-15): online unter
+   <https://ol-karten-prep.web.app>, siehe „Betrieb in der Cloud“ unter Wiedereinstieg.
+   **Nächster Schritt: Weboberfläche.**
 7. **Weboberfläche**: Bereich auf einer Webkarte aufziehen, Einstellungen wählen
    (siehe „Ablauf auf der Website“), fertigen Kartenordner als ZIP herunterladen.
 8. **Erweiterungen**: Hangneigung als zusätzliche Vorlage, bessere Landesdaten weiterer
@@ -372,6 +373,7 @@ data/               Eingangs- und Referenzdaten (nicht vom Programm erzeugt)
   test_stadion_roundtrip.omap  unsere Testdatei, in OOM gespeichert
 src/olprep/         Python-Paket in Schichten (seit 2026-11-15, Entscheidung 17):
   ressourcen.py     OOM-Symbolsätze und .crt-Tabellen (Ort, Maßstäbe), von allen Schichten genutzt
+  oom_symbolsaetze/ mitgelieferte Kopien aus OOM 0.9.6 (GPL-3.0): Symbolsätze je Maßstab, OSM-*.crt
   quellen/          Daten beschaffen: orthofoto.py (Kacheldienste), gelaende.py (BEV-DGM),
                     wien.py (WFS: Stadtgrenze, Höhenlinien), osm.py (Overpass / OSM-API),
                     netz.py (User-Agent, Zwischenspeicher)
@@ -383,7 +385,12 @@ src/olprep/         Python-Paket in Schichten (seit 2026-11-15, Entscheidung 17)
                     Abhängigkeiten nur auftrag → verarbeitung/ausgabe → quellen;
                     tests/test_schichten.py prüft das.
 api/                HTTP-API (FastAPI): main.py (Adressen, Datenmodelle = OpenAPI-Doku),
-                    auftraege.py (Warteschlange, Status, Ergebnis); nutzt olprep.auftrag
+                    auftraege.py (lokal: Warteschlange, Status, Ergebnis), cloud.py (Cloud:
+                    Firestore, Cloud Run Jobs, Cloud Storage), job.py (Einstieg des Cloud Run Jobs);
+                    nutzt olprep.auftrag
+deploy/             einstellungen.ps1, einrichten.ps1 (einmalig), hochladen.ps1 (je Version)
+Dockerfile, requirements-cloud.txt, .gcloudignore   Container für Cloud Run (feste Versionen)
+firebase.json, .firebaserc, firestore.rules          Firebase Hosting und Firestore-Regeln
 scripts/            make_map.py (Kommandozeilenprogramm), make_testfile.py (Formattest)
 tests/              pytest-Tests; referenz/stadion.json = Zusammenfassung der Referenzkarte,
                     referenz/stadion_osm.json.gz = gespeicherter OSM-Download dafür
@@ -432,7 +439,7 @@ VS Code zeigt Ordner mit nur einem Unterordner zusammengefasst als
 
 ```powershell
 .\.venv\Scripts\python.exe -m uvicorn api.main:app --reload
-# Doku zum Ausprobieren: http://127.0.0.1:8000/docs   Beenden: Strg+C
+# Doku zum Ausprobieren: http://127.0.0.1:8000/api/docs   Beenden: Strg+C
 $job = Invoke-RestMethod -Method Post http://127.0.0.1:8000/api/v1/auftraege -ContentType "application/json" `
   -Body '{"name":"stadion","bbox":[16.415,48.203,16.427,48.211],"massstab":4000}'
 Invoke-RestMethod http://127.0.0.1:8000/api/v1/auftraege/$($job.id)          # Status, Fortschritt
@@ -460,10 +467,46 @@ firebase login                         # Anmeldung im Browser
 gcloud auth login
 ```
 
+**Betrieb in der Cloud** (seit 2026-11-15, Projekt `ol-karten-prep`, Region `europe-west1`):
+
+- Öffentliche Adresse: <https://ol-karten-prep.web.app> (Projektübersicht),
+  API unter `/api/v1/…`, Doku zum Ausprobieren unter <https://ol-karten-prep.web.app/api/docs>.
+- **Aufbau:**
+  - *Firebase Hosting* liefert `documentation/projektuebersicht.html` als Startseite aus
+    (`*.md` und Office-Dateien ausgeschlossen, `firebase.json`) und leitet `/api/**` an den
+    Cloud-Run-Service `olprep-api` weiter.
+  - *Service `olprep-api`* (1 GB, 0–2 Instanzen, öffentlich): nimmt Aufträge an, speichert sie
+    in Firestore (Sammlung `auftraege`) und startet je Auftrag eine Ausführung des Jobs mit
+    `AUFTRAG_ID`. Höchstens 3 Aufträge gleichzeitig (sonst 429). Download = Weiterleitung (307)
+    auf einen 1 Stunde gültigen, signierten Link in Cloud Storage.
+  - *Job `olprep-auftrag`* (4 GB, 2 CPU, höchstens 30 min, keine Wiederholung): baut die Karte
+    in `/tmp`, meldet den Fortschritt an Firestore, lädt das ZIP nach
+    `gs://ol-karten-prep-ergebnisse/<id>/<name>.zip`.
+  - *Cloud Storage* `ol-karten-prep-ergebnisse`: privat, ZIPs werden nach 1 Tag gelöscht.
+  - *Firestore* (Native, `europe-west1`): nur der Server greift zu, Zugriff aus dem Browser
+    ist per Regeln gesperrt (`firestore.rules`).
+  - Dienstkonto `olprep-runner` für Service und Job, mit nur den nötigen Rechten
+    (Firestore-Benutzer, Objekt-Admin am Bucket, Job starten, eigene Signatur für die Links).
+- **Unterschiede zu lokal:** OSM nur über Overpass (`OLPREP_OSM_API_ERSATZ=0`), Kachel-Cache in
+  `/tmp`, Fehlermeldungen ohne interne Details. Container mit fest eingestellten Versionen
+  (`requirements-cloud.txt`), OOM-Symbolsätze aus `src/olprep/oom_symbolsaetze/`.
+- **Einmal eingerichtet** mit `deploy\einrichten.ps1` (Dienste, Firestore, Bucket, Image-Ablage,
+  Dienstkonto). **Neue Version hochladen** (nach den Tests und einem Commit; das Image trägt die
+  Commit-Kennung):
+
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File deploy\hochladen.ps1
+  ```
+
+- **Getestet 2026-11-15** über die öffentliche Adresse: Stadion 1:4 000 in 72 s, ZIP mit
+  derselben Orthofoto-Datei wie lokal; ungültige Eingabe → 422; `*.md` und `*.pptx` nicht
+  abrufbar.
+- **Logs:** Google Cloud Console → Cloud Run → `olprep-api` bzw. `olprep-auftrag` → Logs.
+
 **Tests** (pytest, Einstellungen in `pytest.ini`, Stand 2026-11-15: pytest 9.2.0):
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest            # 88 schnelle Tests ohne Internet, ca. 10 s
+.\.venv\Scripts\python.exe -m pytest            # 100 schnelle Tests ohne Internet, ca. 10 s
 .\.venv\Scripts\python.exe -m pytest -m netz    # Referenzkarte, mit Internet, 15 s bis 1 min
 .\.venv\Scripts\python.exe -m pyflakes src scripts tests   # ungenutzte Importe u. Ä.
 ```
@@ -543,19 +586,14 @@ Testkarten stammen noch aus der Zeit vor der Auflösung nach Maßstab.
    Neustart verloren), Ergebnisse in `output/api/<id>/`. 13 API-Tests mit Ersatz-Ablauf ohne
    Download; ein echter Auftrag über den Server getestet (Stadion, 62 s, davon 48 s Overpass).
    Seit 2026-11-15 außerdem A3-Grenze und Orthofoto-Auflösung nach Maßstab (Entscheidungen 19–21).
-7. ⏳ **Firebase / Cloud Run** (Entscheidungen 18, 21–23; vom Benutzer vorgezogen vor die Website):
-   - ✅ Werkzeuge installiert (2026-11-15): Node.js, Firebase-CLI, Google Cloud SDK.
-   - ⏳ Vom Benutzer: Anmeldung (`firebase login`, `gcloud auth login`), Projekt-ID,
-     Tarif Blaze mit Budget-Warnung.
-   - Code: OOM-Symbolsätze und `.crt`-Tabellen mitliefern; Auftragsstatus in Firestore,
-     ZIPs in Cloud Storage (automatisch löschen nach z. B. 1 Tag); Ausführung der Aufträge
-     so, dass Cloud Run nicht drosselt und die 60-s-Grenze von Firebase Hosting nicht greift
-     (voraussichtlich Cloud Run Jobs, in der aktuellen Doku prüfen); in der Cloud nur Overpass
-     (keine OSM-API als Ersatz); `/tmp` liegt im Arbeitsspeicher → nach jedem Auftrag aufräumen;
-     User-Agent mit Link zum öffentlichen GitHub-Repository; `Dockerfile`, `firebase.json`
-     (Hosting zeigt die Projektübersicht, `/api/**` → Cloud Run); Cloud Run 4 GB, `europe-west1`.
-   - Vor dem ersten Hochladen den Benutzer fragen.
-8. **Website** (Leaflet: Bereich wählen mit A3-Rahmen, Einstellungen, Fortschritt, Download).
+7. ✅ **Firebase / Cloud Run** (2026-11-15; vom Benutzer vor die Website gezogen): online unter
+   <https://ol-karten-prep.web.app>, Aufbau unter „Betrieb in der Cloud“. Geprüft in der
+   aktuellen Doku: Firebase Hosting bricht weitergeleitete Anfragen nach 60 s ab (`europe-west1`
+   ist eine empfohlene Region), Cloud Run Jobs laufen bis 168 h und lassen sich mit eigenen
+   Umgebungsvariablen starten (Recht `run.jobs.runWithOverrides`). Zwei Fehler beim ersten
+   Hochladen behoben: fehlende Systembibliothek `libexpat` für rasterio (der Build prüft jetzt
+   die Importe) und das Lesen der Job-Beschreibung (`run.jobs.get`) ohne Berechtigung.
+8. **Website** ← nächster Schritt (Leaflet: Bereich wählen mit A3-Rahmen, Einstellungen, Fortschritt, Download).
    Lizenzhinweis (CC BY 4.0 / ODbL, Quellen müssen auf die Karte) gut sichtbar anzeigen.
 
 ## Offene Fragen
@@ -563,10 +601,11 @@ Testkarten stammen noch aus der Zeit vor der Auflösung nach Maßstab.
 - Höhenbezug: Fertige Wiener Linien liegen auf ganzen Metern über Wiener Null, selbst
   gerechnete auf Vielfachen der Äquidistanz über Adria (EVRF2000, im Mittel 0,5 m unter
   den Wiener Höhen). Für die Kartenform egal. Höhenzahlen an Zählkurven später ggf. angleichen.
-- Ein volles A3-Orthofoto hat 16 800 × 11 880 Pixel (ca. 40 MB JPG). Ob OOM damit flüssig
-  läuft, mit `output/wald_a3_10000` prüfen.
-- API: Alte Aufträge und ihre Dateien werden noch nicht gelöscht (`output/api/` wächst).
-  Mit Cloud Storage über eine Aufbewahrungsregel lösen (z. B. 1 Tag).
+- Lokale API: Alte Aufträge werden nicht gelöscht (`output/api/` wächst; bei Bedarf von Hand
+  löschen). In der Cloud löscht Cloud Storage die ZIPs nach 1 Tag. Die Einträge in Firestore
+  bleiben (wenige Bytes je Auftrag), bei Bedarf später eine Aufbewahrungsregel (TTL) einrichten.
+- Budget-Warnung im Google-Cloud-Zahlungskonto: vom Benutzer einzurichten (z. B. 10 €/Monat),
+  Stand 2026-11-15 nicht geprüft.
 - Der Testclient von FastAPI meldet, dass `httpx` dort veraltet ist und `httpx2` erwartet
   wird (Hinweis, Tests laufen). Umstellen, sobald das Paket geprüft ist.
 - Overpass war am 2026-11-02 meist gestört. Für eine öffentliche Website mit vielen
