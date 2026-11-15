@@ -1214,3 +1214,39 @@ Bestandsaufnahme: Node.js, Firebase-CLI, Google-Cloud-CLI (`gcloud`) und Docker 
 - Vor der Festlegung: Vergleich 10 cm gegen 25 cm an einer Waldkarte 1:10 000 in OOM.
 
 **Offen:** Zustimmung zu beiden Vorschlägen. Die Referenzkarte (1:4 000) bleibt dabei gleich. Außerdem die Erlaubnis, Node.js, die Firebase-CLI und die Google-Cloud-CLI zu installieren.
+
+---
+
+## 34 · 2026-11-15 · A3-Grenze, Auflösung nach Maßstab, Speicher gemessen
+
+### Prompt
+
+> Beide Vorschläge passen, du darfst das nötige instalieren.
+
+### Ergebnis
+
+**Umgesetzt** (Entscheidungen 19–23 in `project.md`):
+- **A3-Grenze:** Der Bereich muss beim gewählten Maßstab auf ein A3-Blatt passen, hoch oder quer. Die Fehlermeldung nennt die Grenze, z. B. „passt bei 1:10000 nicht auf A3 (höchstens 4.20 × 2.97 km)“.
+- **Auflösung des Orthofotos:** 0,025 mm pro Pixel auf dem Papier, nie gröber als 0,5 m. Die Kacheln werden auf der gröbsten Zoomstufe geladen, die fein genug ist, und mit Mittelwertbildung verkleinert. Beim Sprint (1:4 000) bleibt alles wie bisher. Der Referenztest bestätigt, dass die Karte unverändert ist.
+- 15 neue Tests (A3 hoch/quer bei verschiedenen Maßstäben, Wahl der Zoomstufe je Maßstab), insgesamt 88.
+
+**Gemessen mit vollem A3:**
+
+| Karte | Kacheln | Zeit | Arbeitsspeicher (Spitze) | ZIP |
+|---|---|---|---|---|
+| 1:10 000, Waidhofen/Ybbs, 4,1 × 2,8 km | 5040 (Zoom 19 → 25 cm) | 2½–3 min | 1,7 GB | 44 MB |
+| 1:20 000, 8,1 × 5,7 km (MTBO, ohne OSM) | 4920 (Zoom 18 → 50 cm) | 2¾ min | 1,7 GB | 49 MB |
+
+Damit muss das Orthofoto nicht aufgeteilt werden. Für Cloud Run reichen **4 GB**.
+
+**Gefunden:** Bei Waidhofen liefert basemap.at nur bis 20 cm, nicht 10 cm. Echte 10 cm gibt es nur im Wiener Orthofoto (in `datenquellen.md` ergänzt).
+
+**Zum Vergleich in OOM** (gleicher Ausschnitt, 1:10 000, ohne OSM): Schwarzenbergpark in Wien, ca. 1 × 1 km.
+- `output/vergleich_wien_10cm/vergleich_wien_10cm.omap` (10 cm, 1980 Kacheln)
+- `output/vergleich_wien_25cm/vergleich_wien_25cm.omap` (25 cm nach der neuen Regel, 506 Kacheln)
+
+Außerdem zum Ansehen: `output/wald_a3_10000/` und `output/mtbo_a3_20000/` (volles A3).
+
+**Installation:** Node.js und die Google-Cloud-CLI werden mit winget installiert. Die Installation wartet auf die Bestätigung als Administrator (Fenster der Benutzerkontensteuerung). Danach folgt die Firebase-CLI über npm.
+
+**Nachtrag Installation:** Nach der Bestätigung als Administrator sind installiert: Node.js 26.13.1, Google Cloud SDK 593.0.0 (beide mit winget) und die Firebase-CLI 15.36.0 (mit `npm install -g firebase-tools`). Als Nächstes meldet sich der Benutzer an (`firebase login`, `gcloud auth login`) und nennt die Projekt-ID.

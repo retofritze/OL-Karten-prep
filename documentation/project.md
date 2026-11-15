@@ -435,6 +435,17 @@ Remove-Item -Recurse -Force .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt   # Programm + pytest
 ```
 
+**Werkzeuge für Firebase** (installiert 2026-11-15: Node.js 26.13.1, Firebase-CLI 15.36.0,
+Google Cloud SDK 593.0.0; Installation fragt nach Administrator-Bestätigung):
+
+```powershell
+winget install --id OpenJS.NodeJS.LTS -e
+winget install --id Google.CloudSDK -e
+npm install -g firebase-tools          # nach Neustart von VS Code, damit node/npm im Pfad sind
+firebase login                         # Anmeldung im Browser
+gcloud auth login
+```
+
 **Tests** (pytest, Einstellungen in `pytest.ini`, Stand 2026-11-15: pytest 9.2.0):
 
 ```powershell
