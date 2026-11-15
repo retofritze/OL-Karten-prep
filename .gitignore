@@ -1,0 +1,22 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Generated / downloaded data (reproducible)
+output/
+cache/
+
+# Large input data, not redistributed (see documentation/datenquellen.md)
+data/spec/
+data/Orthofoto_Wien_Stadion/*.jpg
+
+# Office files (their metadata contain the author's name), e.g. the infographic source
+*.pptx
+*.docx
+*.xlsx
+
+# Editors / OS
+.vscode/
+Thumbs.db
+desktop.ini

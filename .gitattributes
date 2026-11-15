@@ -1,0 +1,4 @@
+# Keep LF line endings everywhere (files are written with LF)
+* text=auto eol=lf
+*.jpg binary
+*.pdf binary

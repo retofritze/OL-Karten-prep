@@ -1,0 +1,117 @@
+{
+ "dateien": [
+  "QUELLEN.txt",
+  "daten/orthofoto.jgw",
+  "daten/orthofoto.jpg",
+  "daten/osm.json",
+  "daten/schummerung.jgw",
+  "daten/schummerung.jpg",
+  "stadion.omap"
+ ],
+ "georeferenzierung": {
+  "auxiliary_scale_factor": "1",
+  "declination": "5.39",
+  "grid_scale_factor": "1.000005",
+  "grivation": "5.33",
+  "scale": "4000",
+  "epsg": "31256",
+  "ref_point": {
+   "x": "6605.000000",
+   "y": "340959.000000"
+  }
+ },
+ "vorlagen": [
+  [
+   "daten/orthofoto.jpg",
+   "true"
+  ],
+  [
+   "daten/schummerung.jpg",
+   "false"
+  ]
+ ],
+ "bilder": {
+  "orthofoto.jpg": {
+   "pixel": [
+    9930,
+    9906
+   ],
+   "jgw": [
+    "0.1000000000",
+    "0.0000000000",
+    "0.0000000000",
+    "-0.1000000000",
+    "6108.7220044836",
+    "341453.9721289927"
+   ]
+  },
+  "schummerung.jpg": {
+   "pixel": [
+    1053,
+    1051
+   ],
+   "jgw": [
+    "1.0000000000",
+    "0.0000000000",
+    "0.0000000000",
+    "-1.0000000000",
+    "6079.1720044836",
+    "341483.5221289927"
+   ]
+  }
+ },
+ "objekte_andere": {
+  "101": 122,
+  "102": 21
+ },
+ "objekte_andere_sha256": "11f523fc01ca23de7d432e7f7fa4320605a5019078018eeb5a13da72bf8c9f91",
+ "osm_json_sha256": "91557d42659d12523f491447bea66d2fea56a464ce4ed2e00ae43cd10798e395",
+ "objekte_osm": {
+  "213": 2,
+  "301": 4,
+  "313": 5,
+  "401": 217,
+  "403": 1,
+  "405": 12,
+  "410.1": 33,
+  "417": 1080,
+  "501": 14,
+  "501.19": 3,
+  "501.8": 40,
+  "501.9": 75,
+  "505.1": 164,
+  "505.2": 8,
+  "506": 37,
+  "509.1": 45,
+  "515": 13,
+  "518": 41,
+  "520": 5,
+  "521": 121,
+  "524": 2,
+  "531": 49,
+  "532.6": 5
+ },
+ "objekte_osm_sha256": "eb4faea05721a108b9d7976ec2c1e0325e539c5ea24c257dab0779800ff0ae4c",
+ "quellen": [
+  "Bereich (WGS84): W 16.415 S 48.203 O 16.427 N 48.211",
+  "Symbolsatz ISSprOM 2019, Maßstab 1:4000",
+  "Koordinatensystem EPSG:31256, Deklination 5.39° (WMM, Stichtag Erstellung)",
+  "Höhenlinien 2.5 m, Zählkurven 12.5 m, selbst berechnet aus dem BEV ALS-Geländemodell 1 m (Stichtag 2025-09-15), geglättet. Höhen über Adria (EVRF2000).",
+  "Schummerung (Vorlage, anfangs ausgeblendet): aus dem BEV-Geländemodell, Licht von Nordwesten.",
+  "OpenStreetMap: 1960 Objekte, zugeordnet mit der OOM-Tabelle OSM-ISSprOM 2019.crt. Rohdaten in daten/osm.json.",
+  "",
+  "Datenquellen:",
+  "- Orthofoto: Stadt Wien – data.wien.gv.at (CC BY 4.0)",
+  "- Geländemodell (Höhenlinien selbst berechnet, Schummerung): BEV – Bundesamt für Eich- und Vermessungswesen (CC BY 4.0)",
+  "- Wege, Gebäude u. a.: © OpenStreetMap-Mitwirkende (ODbL)",
+  "",
+  "WICHTIG – Lizenz CC BY 4.0 (Namensnennung):",
+  "Die Daten dürfen frei verwendet werden, auch kommerziell, aber nur mit Nennung der Quelle.",
+  "Die oben genannten Datenquellen MÜSSEN deshalb auf der fertigen Karte stehen",
+  "(z. B. im Kartenrand beim Impressum), auch auf jedem Ausdruck und jeder veröffentlichten Version.",
+  "Lizenztext: https://creativecommons.org/licenses/by/4.0/deed.de",
+  "",
+  "OpenStreetMap-Daten stehen unter der ODbL. Auch hier gilt: \"© OpenStreetMap-Mitwirkende\"",
+  "muss auf der Karte stehen. Lizenz: https://www.openstreetmap.org/copyright"
+ ]
+}

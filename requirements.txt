@@ -1,0 +1,11 @@
+lxml
+pyproj
+pygeomag
+rasterio
+requests
+shapely
+contourpy
+scipy
+numpy
+fastapi
+uvicorn
