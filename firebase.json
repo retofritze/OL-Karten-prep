@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "documentation",
+    "ignore": ["**/*.md", "**/.*", "firebase.json", "**/*.pptx", "**/*.docx", "**/*.xlsx"],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "run": { "serviceId": "olprep-api", "region": "europe-west1" }
+      },
+      { "source": "/", "destination": "/projektuebersicht.html" }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

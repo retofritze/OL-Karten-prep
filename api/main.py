@@ -2,10 +2,13 @@
 
 Start locally (from the project folder):
     .\\.venv\\Scripts\\python.exe -m uvicorn api.main:app --reload
-Then: http://127.0.0.1:8000/docs (interactive documentation, generated from this file).
+Then: http://127.0.0.1:8000/api/docs (interactive documentation, generated from this file).
 
 A map takes 30 s to minutes, so the API works with jobs:
     POST /api/v1/auftraege  ->  GET /api/v1/auftraege/{id}  ...until "fertig"  ->  GET .../ergebnis
+
+OLPREP_BETRIEB=cloud (set in the Cloud Run service) switches from local threads and files
+to Firestore, Cloud Run Jobs and Cloud Storage (api/cloud.py).
 """
 
 from __future__ import annotations
@@ -21,13 +24,13 @@ if str(ROOT / "src") not in sys.path:
 
 from fastapi import FastAPI, Request  # noqa: E402
 from fastapi.exceptions import RequestValidationError  # noqa: E402
-from fastapi.responses import FileResponse, JSONResponse  # noqa: E402
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse  # noqa: E402
 from pydantic import BaseModel, Field  # noqa: E402
 
 from olprep.auftrag import Auftrag, Eingabefehler  # noqa: E402
 from olprep.ressourcen import SYMBOL_SETS  # noqa: E402
 
-from .auftraege import FERTIG, Auftragsverwaltung, Eintrag  # noqa: E402
+from .auftraege import FERTIG, Ausgelastet, Auftragsverwaltung, Eintrag  # noqa: E402
 
 PREFIX = "/api/v1"
 ARBEITSORDNER = Path(os.environ.get("OLPREP_API_ORDNER", ROOT / "output" / "api"))
@@ -86,17 +89,34 @@ def _fehler(code: int, text: str) -> JSONResponse:
 
 # --- app -----------------------------------------------------------------------
 
-def create_app(verwaltung: Auftragsverwaltung | None = None) -> FastAPI:
-    verwaltung = verwaltung or Auftragsverwaltung(ARBEITSORDNER)
+def _verwaltung_aus_umgebung():
+    if os.environ.get("OLPREP_BETRIEB") == "cloud":
+        from .cloud import CloudAuftragsverwaltung
+        return CloudAuftragsverwaltung.aus_umgebung()
+    return Auftragsverwaltung(ARBEITSORDNER)
+
+
+def create_app(verwaltung=None) -> FastAPI:
+    """verwaltung: Auftragsverwaltung (local) or CloudAuftragsverwaltung; default from environment."""
+    verwaltung = verwaltung or _verwaltung_aus_umgebung()
     app = FastAPI(
         title="OL-Karten-prep",
         default_response_class=UTF8JSONResponse,
+        # under /api, so that Firebase Hosting forwards them to Cloud Run as well
+        docs_url="/api/docs", redoc_url=None, openapi_url="/api/openapi.json",
         version="0.1.0",
         description="Bereitet Orientierungslauf-Karten für OpenOrienteering Mapper vor: "
                     "Orthofoto, Höhenlinien, Schummerung und OpenStreetMap-Objekte, georeferenziert "
                     "und nach magnetisch Nord gedreht. Ein Auftrag liefert den Kartenordner als ZIP.",
     )
     app.state.verwaltung = verwaltung
+
+    @app.middleware("http")
+    async def no_cache(request: Request, call_next):
+        # status changes every few seconds: the Firebase Hosting CDN must not cache it
+        response = await call_next(request)
+        response.headers.setdefault("Cache-Control", "no-store")
+        return response
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request: Request, exc: RequestValidationError) -> JSONResponse:
@@ -111,7 +131,8 @@ def create_app(verwaltung: Auftragsverwaltung | None = None) -> FastAPI:
 
     @app.post(f"{PREFIX}/auftraege", status_code=202, response_model=AuftragStatus, tags=["Aufträge"],
               summary="Neuen Kartenauftrag anlegen",
-              responses={422: {"model": Fehler, "description": "Eingabe ungültig"}})
+              responses={422: {"model": Fehler, "description": "Eingabe ungültig"},
+                         429: {"model": Fehler, "description": "Zu viele Aufträge gleichzeitig"}})
     def auftrag_anlegen(eingabe: AuftragEingabe):
         try:
             eintrag = verwaltung.anlegen(Auftrag(eingabe.name, tuple(eingabe.bbox), eingabe.massstab,
@@ -119,6 +140,8 @@ def create_app(verwaltung: Auftragsverwaltung | None = None) -> FastAPI:
                                                  eingabe.zaehlkurve, eingabe.osm))
         except Eingabefehler as e:
             return _fehler(422, str(e))
+        except Ausgelastet as e:
+            return _fehler(429, str(e))
         return _status(eintrag)
 
     @app.get(f"{PREFIX}/auftraege/{{auftrag_id}}", response_model=AuftragStatus, tags=["Aufträge"],
@@ -134,6 +157,7 @@ def create_app(verwaltung: Auftragsverwaltung | None = None) -> FastAPI:
              summary="Fertigen Kartenordner als ZIP herunterladen",
              response_class=FileResponse,
              responses={200: {"content": {"application/zip": {}}, "description": "Kartenordner als ZIP"},
+                        307: {"description": "Weiterleitung zum Download aus Cloud Storage (1 Stunde gültig)"},
                         404: {"model": Fehler, "description": "Auftrag nicht gefunden"},
                         409: {"model": Fehler, "description": "Auftrag noch nicht fertig"}})
     def auftrag_ergebnis(auftrag_id: str):
@@ -144,7 +168,10 @@ def create_app(verwaltung: Auftragsverwaltung | None = None) -> FastAPI:
             text = (f"Auftrag fehlgeschlagen: {eintrag.fehler}" if eintrag.fehler
                     else f"Auftrag läuft noch ({eintrag.fortschritt} %)")
             return _fehler(409, text)
-        return FileResponse(eintrag.zip, media_type="application/zip", filename=f"{eintrag.auftrag.name}.zip")
+        ziel = verwaltung.download(eintrag)
+        if isinstance(ziel, str):                       # cloud: signed URL of Cloud Storage
+            return RedirectResponse(ziel, status_code=307)
+        return FileResponse(ziel, media_type="application/zip", filename=f"{eintrag.auftrag.name}.zip")
 
     return app
 

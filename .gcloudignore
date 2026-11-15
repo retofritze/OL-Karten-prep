@@ -1,0 +1,15 @@
+# Files NOT uploaded to Cloud Build (the image only needs Dockerfile, requirements, src/, api/)
+.git/
+.gitignore
+.venv/
+__pycache__/
+cache/
+output/
+data/
+documentation/
+tests/
+scripts/
+*.pptx
+*.docx
+*.xlsx
+.vscode/

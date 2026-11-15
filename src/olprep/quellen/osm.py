@@ -6,6 +6,7 @@ Overpass is the intended service for read-only use. If it is down (it was on
 
 from __future__ import annotations
 
+import os
 from typing import Callable
 
 import requests
@@ -15,6 +16,16 @@ from .netz import USER_AGENT
 OVERPASS = ("https://overpass-api.de/api/interpreter",)
 OSM_API = "https://api.openstreetmap.org/api/0.6"
 ATTRIBUTION = "Wege, Gebäude u. a.: © OpenStreetMap-Mitwirkende (ODbL)"
+
+
+class OsmNichtErreichbar(RuntimeError):
+    """Overpass is down and the OSM API fallback is not allowed (public website)."""
+
+
+def api_fallback_allowed() -> bool:
+    """The OSM editing API may serve as fallback for single users only, not for a public
+    website (OSM API usage policy). Set OLPREP_OSM_API_ERSATZ=0 in the cloud."""
+    return os.environ.get("OLPREP_OSM_API_ERSATZ", "1") != "0"
 
 
 def download(bbox_wgs84: tuple[float, float, float, float], keys: list[str],
@@ -28,6 +39,9 @@ def download(bbox_wgs84: tuple[float, float, float, float], keys: list[str],
         data = _overpass(bbox_wgs84, keys)
         print("  OpenStreetMap über Overpass geladen")
     except (requests.RequestException, ValueError) as err:
+        if not api_fallback_allowed():
+            raise OsmNichtErreichbar("OpenStreetMap (Overpass) ist gerade nicht erreichbar. "
+                                     "Bitte später noch einmal versuchen oder ohne OSM bestellen.") from err
         print(f"  Overpass nicht erreichbar ({err}), lade über die OSM-API")
         data = _osm_api(bbox_wgs84, wanted)
     return data

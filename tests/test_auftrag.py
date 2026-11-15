@@ -25,6 +25,15 @@ def test_default_symbol_set(scale, name):
     assert default_symbol_set(scale) == name
 
 
+def test_all_symbol_sets_are_shipped():
+    """The cloud has no OOM installation: every offered symbol set and table must be bundled."""
+    from olprep.ressourcen import CRT_FILES, crt_file, symbol_set_file
+    missing = [f"{s} 1:{m}" for s, scales in SYMBOL_SETS.items() for m in scales
+               if not symbol_set_file(s, m).exists()]
+    missing += [s for s in CRT_FILES if not crt_file(s).exists()]
+    assert missing == []
+
+
 def test_defaults_filled_in():
     a = Auftrag("stadion", [16.415, 48.203, 16.427, 48.211], 4000).geprueft()
     assert a.symbolsatz == "ISSprOM 2019"

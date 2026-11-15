@@ -1,9 +1,9 @@
-"""Job management for the API: queue, status and result of each map job.
+"""Job management for the API, local variant: queue, status and result of each map job.
 
 Jobs run one after another in a background thread (the data sources and the memory of
 one machine are the limit, and waiting jobs show the status "wartend"). The status is
-kept in memory; with Firebase it moves to Firestore and the ZIPs to Cloud Storage
-(project.md, decision 18).
+kept in memory. In the cloud, api/cloud.py does the same with Firestore, Cloud Run Jobs
+and Cloud Storage (project.md, decision 18). Both offer anlegen(), holen(), download().
 """
 
 from __future__ import annotations
@@ -26,6 +26,21 @@ WARTEND, LAEUFT, FERTIG, FEHLER = "wartend", "laeuft", "fertig", "fehler"
 Runner = Callable[[Auftrag, Path, Melde], Ergebnis]
 
 
+class Ausgelastet(RuntimeError):
+    """Too many jobs at the same time; the user should try again later."""
+
+
+def fehlertext(e: Exception) -> str:
+    """Message for the user: our own RuntimeErrors are written for users (German, no
+    internals); a failed download gets a general hint; anything else only its type."""
+    import requests                                     # imported here: only needed on errors
+    if isinstance(e, RuntimeError):
+        return str(e)
+    if isinstance(e, requests.RequestException):
+        return "Ein Datendienst war nicht erreichbar. Bitte später noch einmal versuchen."
+    return f"Interner Fehler ({type(e).__name__}). Bitte später noch einmal versuchen."
+
+
 def _run_job(auftrag: Auftrag, ziel: Path, melde: Melde) -> Ergebnis:
     return ausfuehren(auftrag, ziel, melde=melde)
 
@@ -38,7 +53,7 @@ class Eintrag:
     fortschritt: int = 0
     schritt: str = "wartet auf Start"
     fehler: str | None = None
-    zip: Path | None = None
+    zip: Path | str | None = None        # local file, or object name in Cloud Storage
     erstellt: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -77,9 +92,13 @@ class Auftragsverwaltung:
             ergebnis = self._runner(eintrag.auftrag, self.arbeitsordner / eintrag.id, melde)
         except Exception as e:      # any failure ends this job, not the server
             log.exception("Auftrag %s fehlgeschlagen", eintrag.id)
-            self._setzen(eintrag, status=FEHLER, fehler=f"{type(e).__name__}: {e}")
+            self._setzen(eintrag, status=FEHLER, fehler=fehlertext(e))
         else:
             self._setzen(eintrag, status=FERTIG, fortschritt=100, schritt="fertig", zip=ergebnis.zip)
+
+    def download(self, eintrag: Eintrag) -> Path:
+        """Local ZIP file of a finished job (the cloud variant returns a URL)."""
+        return Path(eintrag.zip)
 
     def beenden(self) -> None:
         self._pool.shutdown(wait=False, cancel_futures=True)

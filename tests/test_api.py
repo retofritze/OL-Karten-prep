@@ -116,7 +116,7 @@ def test_failed_job(make_client):
     job = client.post(f"{PREFIX}/auftraege", json=STADION).json()
     done = wait_until(client, job["id"])
     assert done["status"] == "fehler"
-    assert done["fehler"] == "RuntimeError: Kachelserver nicht erreichbar"
+    assert done["fehler"] == "Kachelserver nicht erreichbar"       # own RuntimeErrors are for users
     r = client.get(f"{PREFIX}/auftraege/{job['id']}/ergebnis")
     assert r.status_code == 409 and "fehlgeschlagen" in r.json()["fehler"]
 
@@ -146,7 +146,7 @@ def test_unknown_job(make_client):
 
 def test_openapi_documentation(make_client):
     client, _ = make_client()
-    spec = client.get("/openapi.json").json()
+    spec = client.get("/api/openapi.json").json()
     assert set(spec["paths"]) == {f"{PREFIX}/symbolsaetze", f"{PREFIX}/auftraege",
                                   f"{PREFIX}/auftraege/{{auftrag_id}}", f"{PREFIX}/auftraege/{{auftrag_id}}/ergebnis"}
-    assert client.get("/docs").status_code == 200
+    assert client.get("/api/docs").status_code == 200

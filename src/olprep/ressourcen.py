@@ -1,8 +1,9 @@
 """Files shipped with OpenOrienteering Mapper: symbol sets and OSM cross-reference tables.
 
-Used by all layers. Today they are read from the local OOM installation (or the folder
-in the environment variable OOM_SYMBOL_SETS); for the cloud they will be shipped with
-the program (GPL, see project.md decision 18).
+Used by all layers. Copies from OOM 0.9.6 are shipped with the package in
+oom_symbolsaetze/ (GPL-3.0, see LIESMICH.md there), because there is no OOM installation
+in the cloud. The environment variable OOM_SYMBOL_SETS can point to another folder with
+the same layout, e.g. the "symbol sets" folder of a local OOM installation.
 """
 
 from __future__ import annotations
@@ -11,7 +12,7 @@ import os
 from pathlib import Path
 
 OOM_SYMBOL_SETS = Path(os.environ.get(
-    "OOM_SYMBOL_SETS", r"C:\Program Files\OpenOrienteering Mapper 0.9.6\symbol sets"))
+    "OOM_SYMBOL_SETS", Path(__file__).resolve().parent / "oom_symbolsaetze"))
 
 # Symbol sets shipped with OOM 0.9.6 and their scales (Course_Design is for course setting)
 SYMBOL_SETS = {
