@@ -1174,3 +1174,43 @@ Bestandsaufnahme: Node.js, Firebase-CLI, Google-Cloud-CLI (`gcloud`) und Docker 
 - Einzige Version auf GitHub: ein Commit „Initial commit: OL-Karten-prep“. Eine alte Commit-Kennung im Lab Notebook (Eintrag 26) wurde vorher entfernt.
 - Einschränkung: GitHub löscht die alten, nicht mehr verbundenen Commits nicht sofort. Wer ihre Kennung kennt, kann sie über die direkte Adresse noch abrufen (geprüft: HTTP 200). Die Kennungen stehen nirgends mehr im Repository. Endgültig entfernen kann sie nur der GitHub-Support (Formular „Remove data from a repository“, Stichwort „cached views / dangling commits“). Die betroffenen Angaben sind ein Autorenname in Office-Metadaten, Windows-Benutzernamen und der Name eines OneDrive-Ordners.
 - Die alte Geschichte ist nur lokal als Sicherungsdatei (Git-Bundle) im Scratchpad dieser Sitzung vorhanden, nicht im Projekt.
+
+---
+
+## 33 · 2026-11-15 · Kartengröße A3 und Auflösung des Orthofotos
+
+### Prompt
+
+> Die Grösse der Karte können wir noch weiter einschränken, da wir maximal auf A3 drucken werden. Du kannst also nach dem Download die Auflösung entsprechend weiter reduzieren. Bei der Reduktion der Auflösung sollen aber möglichst keine wichtigen Merkmale in der Natur verloren gehen (z.B. Kulturgrenzen, menschengemachte Objekte, etc).
+>
+> Berechne noch für uns: nimm den kleinsten Kartenmassstab; wenn man diesen Masstab auf einem A3-Papier darstellen will, welche Kartengrösse in Kilometer in der Natur ergibt das dann?
+
+### Ergebnis
+
+**A3 bei 1:20 000** (kleinster angebotener Maßstab, MTBO): 420 × 297 mm entsprechen **8,4 × 5,94 km ≈ 50 km²**. Mit 1 cm Rand rundum bleiben 8,0 × 5,54 km ≈ 44 km².
+
+| Maßstab | A3 in der Natur | km² |
+|---|---|---|
+| 1:4 000 | 1,68 × 1,19 km | 2,0 |
+| 1:5 000 | 2,10 × 1,49 km | 3,1 |
+| 1:7 500 | 3,15 × 2,23 km | 7,0 |
+| 1:10 000 | 4,20 × 2,97 km | 12,5 |
+| 1:12 500 | 5,25 × 3,71 km | 19,5 |
+| 1:15 000 | 6,30 × 4,46 km | 28,1 |
+| 1:20 000 | 8,40 × 5,94 km | 49,9 |
+
+**Vorschlag 1:** Die größte Fläche hängt vom Maßstab ab. Der Bereich muss beim gewählten Maßstab auf ein A3-Blatt passen, hoch oder quer. Das ersetzt die feste Grenze von 4 km².
+
+**Vorschlag 2:** Die Auflösung des Orthofotos richtet sich nach dem Maßstab: **1 Pixel = 0,025 mm auf dem Papier**.
+- Das ergibt 10 cm bei 1:4 000 (wie heute, kein Verlust beim Sprint), 25 cm bei 1:10 000, 37,5 cm bei 1:15 000 und 50 cm bei 1:20 000.
+- Ein volles A3-Blatt hat damit bei jedem Maßstab 16 800 × 11 880 Pixel: etwa 600 MB für das fertige Bild, in der Spitze rund 2 GB, Orthofoto-Datei ca. 40 MB, höchstens ca. 5 000 Kacheln.
+- Cloud Run mit 4 GB reicht voraussichtlich. Ein Aufteilen in Stücke ist dann wohl nicht nötig, ich messe das vorher.
+
+**Damit keine Merkmale verloren gehen:**
+- Die nächstfeinere Zoomstufe des Kacheldienstes laden und erst danach verkleinern.
+- Beim Verkleinern mitteln statt bilinear rechnen. Schmale Linien (Wege, Zäune, Kulturgrenzen) bleiben dann als blassere Linie erhalten, statt zu verschwinden.
+- Nie gröber als 0,5 m pro Pixel.
+- Gebäude, Wege, Zäune und Mauern kommen ohnehin als Vektoren aus OSM, die Höhenlinien aus dem Geländemodell. Beides hängt nicht vom Orthofoto ab.
+- Vor der Festlegung: Vergleich 10 cm gegen 25 cm an einer Waldkarte 1:10 000 in OOM.
+
+**Offen:** Zustimmung zu beiden Vorschlägen. Die Referenzkarte (1:4 000) bleibt dabei gleich. Außerdem die Erlaubnis, Node.js, die Firebase-CLI und die Google-Cloud-CLI zu installieren.

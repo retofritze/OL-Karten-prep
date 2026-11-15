@@ -50,7 +50,8 @@ Alle Quellen sind kostenlos und unter CC BY 4.0 nutzbar. Die Namensnennung gehö
 - **WMTS (geprüft):** Capabilities `https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml`
   - Kachel-URL: `https://mapsneu.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{row}/{col}.jpeg`
   - Auflösung 29 cm flächendeckend, 15 cm in einzelnen Regionen. Zoom 19 gibt es überall,
-    Zoom 20 nur in manchen Gebieten. Geprüft: Zoom 20 in Wien vorhanden, in Melk, Gmünd und Hollabrunn nicht.
+    Zoom 20 nur in manchen Gebieten. Geprüft: Zoom 20 in Wien vorhanden, in Melk, Gmünd und Hollabrunn nicht,
+    in Waidhofen/Ybbs auch nicht (2026-11-15). Feiner als 10 cm ist damit nur das Wiener Orthofoto.
   - Das Flugjahr ist je Region verschieden. Es steht als Wasserzeichen in den Kacheln ab Zoom 17 und im Datensatz
     „Erfassungsstände“: <https://www.data.gv.at/datasets/8795c23b-4db6-4a01-97a2-617adbe750a2?locale=de>
   - Lizenz CC BY 4.0, Namensnennung „Datenquelle: basemap.at“ mit Link auf <https://basemap.at/>.

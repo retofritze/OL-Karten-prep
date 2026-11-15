@@ -264,6 +264,30 @@ JPG + `.jgw` gespeichert, als Koordinatensystem dient der GK-Streifen der Karten
     - **OSM für eine öffentliche Website:** Die OSM-API ist als Ersatz nicht erlaubt. Overpass
       oder ein eigener Datenauszug, dazu eine Begrenzung der Kartengröße.
 
+## Entscheidungen (2026-11-15): Kartengröße, Orthofoto, Betrieb
+
+19. **Höchstens A3:** Der Bereich muss beim gewählten Maßstab auf ein A3-Blatt passen
+    (420 × 297 mm, hoch oder quer; `PAPIER_MM` in `auftrag.py`). Ersetzt die vorläufige
+    Grenze von 4 km². In der Natur: 1:4 000 → 1,68 × 1,19 km, 1:10 000 → 4,2 × 2,97 km,
+    1:15 000 → 6,3 × 4,46 km, 1:20 000 → 8,4 × 5,94 km.
+20. **Auflösung des Orthofotos nach Maßstab:** 1 Pixel = 0,025 mm auf dem Papier
+    (`PIXEL_MM`), nie gröber als 0,5 m. 10 cm bei 1:4 000 (wie bisher), 25 cm bei 1:10 000,
+    50 cm bei 1:20 000. Volles A3 = 16 800 × 11 880 Pixel bei jedem Maßstab. Kacheln werden auf
+    der gröbsten Zoomstufe geladen, die (bis 10 % Toleranz) fein genug ist, und mit
+    Mittelwertbildung verkleinert (`Resampling.average`), damit schmale Merkmale (Wege, Zäune,
+    Kulturgrenzen) als blassere Linie erhalten bleiben. Gebäude, Wege, Zäune kommen zusätzlich
+    als OSM-Vektoren. Außerhalb Wiens liefert basemap.at meist höchstens 20 cm.
+21. **Gemessen (2026-11-15, volles A3):** 1:10 000 bei Waidhofen/Ybbs (4,1 × 2,8 km): 5040
+    Kacheln, 151–175 s, Spitze 1,7 GB Arbeitsspeicher, ZIP 44 MB. 1:20 000 (8,1 × 5,7 km,
+    ohne OSM): 4920 Kacheln, 164 s, Spitze 1,7 GB, ZIP 49 MB. Ein Aufteilen des Orthofotos ist
+    nicht nötig. **Cloud Run: 4 GB** (Dateien liegen dort ebenfalls im Arbeitsspeicher).
+22. **Öffentlicher Zugang** zur Website, ohne Anmeldung (erwartet: eine Handvoll Nutzer).
+    Schutz über die A3-Grenze und die Warteschlange (Aufträge nacheinander).
+23. **Rechenzentrum `europe-west1`** (Belgien), obwohl die Nutzer in Österreich sind:
+    Laufzeit eines Auftrags (Minuten) überwiegt die Netzlaufzeit bei Weitem, günstigere
+    Preisstufe als Frankfurt/Zürich, Weiterleitung von Firebase Hosting möglich (beim
+    Einrichten in der aktuellen Doku prüfen).
+
 ## Ablauf auf der Website (Vorgabe 2026-11-02)
 
 Der Benutzer stellt möglichst viel selbst ein, damit das Programm für viele
@@ -414,7 +438,7 @@ Remove-Item -Recurse -Force .venv
 **Tests** (pytest, Einstellungen in `pytest.ini`, Stand 2026-11-15: pytest 9.2.0):
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest            # 73 schnelle Tests ohne Internet, ca. 10 s
+.\.venv\Scripts\python.exe -m pytest            # 88 schnelle Tests ohne Internet, ca. 10 s
 .\.venv\Scripts\python.exe -m pytest -m netz    # Referenzkarte, mit Internet, 15 s bis 1 min
 .\.venv\Scripts\python.exe -m pyflakes src scripts tests   # ungenutzte Importe u. Ä.
 ```
@@ -494,10 +518,6 @@ M28, 1:10000), `test_stadion` (Formattest von Phase 1).
   den Wiener Höhen). Für die Kartenform egal. Höhenzahlen an Zählkurven später ggf. angleichen.
 - Bei großen Waldkarten wird das Orthofoto groß (1 km² ≈ 20 MB bei 10 cm, ≈ 9 MB bei
   20 cm). Ab wann OOM langsam wird, im Test beobachten.
-- **Größte Kartenfläche:** vorläufig 4 km² (`MAX_FLAECHE_KM2` in `auftrag.py`, gesetzt
-  2026-11-15). Grund: 1 km² Orthofoto mit 10 cm braucht beim Verarbeiten rund 300 MB
-  Arbeitsspeicher. Bisherige Testkarten: höchstens ca. 2 km². Vor dem Online-Gang festlegen
-  (Speicher von Cloud Run, typische Größe von Waldkarten, ggf. gröberes Orthofoto bei großen Flächen).
 - API: Alte Aufträge und ihre Dateien werden noch nicht gelöscht (`output/api/` wächst).
   Mit Cloud Storage über eine Aufbewahrungsregel lösen (z. B. 1 Tag).
 - Der Testclient von FastAPI meldet, dass `httpx` dort veraltet ist und `httpx2` erwartet

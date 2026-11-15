@@ -34,9 +34,12 @@ MARGIN_M = 50                   # extra orthophoto and contours around the reque
 
 # Area the data sources cover (Austria, generous), WGS84: west, south, east, north
 GEBIET = (9.4, 46.3, 17.2, 49.1)
-# Provisional upper limit of the map area (memory: 1 km² of 10 cm orthophoto ≈ 300 MB while
-# processing). To be decided with the user before the website goes online.
-MAX_FLAECHE_KM2 = 4.0
+# Largest map: the area must fit on A3 at the chosen scale, portrait or landscape
+# (decision 2026-11-15: maps are printed on A3 at most). At 1:20 000 that is 8.4 × 5.94 km.
+PAPIER_MM = (420, 297)
+# Orthophoto resolution: 1 pixel = 0.025 mm on paper (10 cm at 1:4000, 25 cm at 1:10 000,
+# 50 cm at 1:20 000), so a full A3 sheet has 16 800 × 11 880 pixels at every scale.
+PIXEL_MM = 0.025
 NAME_PATTERN = re.compile(r"[\w-]{1,60}")      # letters (incl. umlauts), digits, _ and -
 
 Melde = Callable[[str, int], None]              # (step, percent 0-100)
@@ -69,11 +72,6 @@ class Auftrag:
         gw, gs, go, gn = GEBIET
         if not (gw <= west and east <= go and gs <= south and north <= gn):
             raise Eingabefehler("Bereich liegt nicht in Österreich (nur dafür gibt es die Daten)")
-        width_m, height_m = _size_m(west, south, east, north)
-        if width_m * height_m / 1e6 > MAX_FLAECHE_KM2:
-            raise Eingabefehler(f"Bereich {width_m / 1000:.1f} × {height_m / 1000:.1f} km ist zu groß "
-                                f"(höchstens {MAX_FLAECHE_KM2:g} km²)")
-
         if self.symbolsatz is not None and self.symbolsatz not in SYMBOL_SETS:
             raise Eingabefehler(f"Unbekannter Symbolsatz {self.symbolsatz!r}, möglich: {', '.join(SYMBOL_SETS)}")
         try:
@@ -83,6 +81,15 @@ class Auftrag:
         if self.massstab not in SYMBOL_SETS[symbolsatz]:
             raise Eingabefehler(f"{symbolsatz} gibt es nur für 1:"
                                 + ", 1:".join(map(str, SYMBOL_SETS[symbolsatz])))
+
+        width_m, height_m = _size_m(west, south, east, north)
+        long_mm, short_mm = (max(width_m, height_m) / self.massstab * 1000,
+                             min(width_m, height_m) / self.massstab * 1000)
+        if long_mm > PAPIER_MM[0] or short_mm > PAPIER_MM[1]:
+            km = [p / 1000 * self.massstab / 1000 for p in PAPIER_MM]
+            raise Eingabefehler(
+                f"Bereich {width_m / 1000:.2f} × {height_m / 1000:.2f} km passt bei 1:{self.massstab} "
+                f"nicht auf A3 (höchstens {km[0]:.2f} × {km[1]:.2f} km)")
 
         aequidistanz = (2.5 if symbolsatz.startswith("ISSprOM") else 5.0) \
             if self.aequidistanz is None else float(self.aequidistanz)
@@ -141,7 +148,7 @@ def ausfuehren(auftrag: Auftrag, ziel: Path, melde: Melde = _quiet, mit_zip: boo
     data_dir = out_dir / DATA_DIR
     melde("Orthofoto laden", 5)
     ortho = data_dir / "orthofoto.jpg"
-    foto = orthofoto(epsg, area)
+    foto = orthofoto(epsg, area, resolution=a.massstab * PIXEL_MM / 1000)
     save_jpg(foto.image, foto.transform, epsg, ortho)
     print(f"  Orthofoto {foto.resolution * 100:.0f} cm/Pixel -> {ortho.name}")
     doc.add_georeferenced_image(ortho, out_dir)

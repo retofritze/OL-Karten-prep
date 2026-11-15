@@ -141,20 +141,44 @@ class Orthofoto:
     resolution: float           # m per pixel
 
 
-def orthofoto(epsg: int, bounds: tuple[float, float, float, float],
+MAX_RESOLUTION_M = 0.5     # never coarser: field edges, paths and buildings stay recognisable
+ZOOM_TOLERANCE = 1.1       # a zoom up to 10 % coarser than wanted is used as is (fewer tiles)
+
+
+def ground_resolution(z: int, lat: float) -> float:
+    """m per pixel of a Web Mercator tile at zoom z on the ground (Mercator scale 1/cos(lat))."""
+    return tile_size_m(z) / TILE * math.cos(math.radians(lat))
+
+
+def start_zoom(max_zoom: int, lat: float, resolution: float | None) -> int:
+    """Coarsest zoom that is (nearly) as fine as the wanted resolution; max_zoom if None."""
+    z = max_zoom
+    if resolution is not None:
+        while z > 0 and ground_resolution(z - 1, lat) <= resolution * ZOOM_TOLERANCE:
+            z -= 1
+    return z
+
+
+def orthofoto(epsg: int, bounds: tuple[float, float, float, float], resolution: float | None = None,
               sources: tuple[TileSource, ...] = SOURCES) -> Orthofoto:
     """Orthophoto for bounds (xmin, ymin, xmax, ymax in EPSG:<epsg>) in the map CRS.
 
-    Uses the first source that covers the whole area, at its highest zoom
-    available there.
+    Uses the first source that covers the whole area. resolution: wanted m per pixel
+    (None: finest available; capped at MAX_RESOLUTION_M). Tiles are loaded at the coarsest
+    zoom that is at least about as fine, then reduced by averaging ("average" resampling):
+    every new pixel is the mean of the pixels it covers, so thin features (paths, fences,
+    field edges) stay visible as fainter lines instead of being skipped as with bilinear.
     """
+    if resolution is not None:
+        resolution = min(resolution, MAX_RESOLUTION_M)
     to_3857 = pyproj.Transformer.from_crs(epsg, 3857, always_xy=True)
     b3857 = to_3857.transform_bounds(*bounds, densify_pts=21)
     lat = pyproj.Transformer.from_crs(epsg, 4326, always_xy=True).transform(
         (bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2)[1]
 
     for src in sources:
-        for z in range(src.max_zoom, src.max_zoom - 2, -1):
+        first = start_zoom(src.max_zoom, lat, resolution)
+        for z in range(first, first - 2, -1):
             if not covers(src, b3857, z):
                 continue
             try:
@@ -162,20 +186,24 @@ def orthofoto(epsg: int, bounds: tuple[float, float, float, float],
             except TileMissing as e:
                 print(f"  {src.key}: Zoom {z} unvollständig ({e})")
                 continue
-            # Ground resolution of the tiles (Mercator scale 1/cos(lat)), rounded to cm
-            res = round(tile_size_m(z) / TILE * math.cos(math.radians(lat)), 2)
-            out, out_transform = _reproject(image, transform, epsg, bounds, res)
+            tile_res = round(ground_resolution(z, lat), 2)          # rounded to cm
+            if resolution is not None and tile_res < resolution / ZOOM_TOLERANCE:
+                res, method = resolution, Resampling.average        # reduce
+            else:
+                res, method = tile_res, Resampling.bilinear         # keep the tile resolution
+            out, out_transform = _reproject(image, transform, epsg, bounds, res, method)
             return Orthofoto(out, out_transform, src, res)
     raise RuntimeError("Keine Orthofoto-Quelle deckt den Bereich ab.")
 
 
 def _reproject(image: np.ndarray, transform: rasterio.Affine, epsg: int,
-               bounds: tuple[float, float, float, float], res: float) -> tuple[np.ndarray, rasterio.Affine]:
+               bounds: tuple[float, float, float, float], res: float,
+               method: Resampling = Resampling.bilinear) -> tuple[np.ndarray, rasterio.Affine]:
     xmin, ymin, xmax, ymax = bounds
     width, height = math.ceil((xmax - xmin) / res), math.ceil((ymax - ymin) / res)
     dst_transform = from_origin(xmin, ymax, res, res)
     out = np.full((3, height, width), 255, dtype=np.uint8)
     reproject(image, out, src_transform=transform, src_crs="EPSG:3857",
               dst_transform=dst_transform, dst_crs=f"EPSG:{epsg}",
-              resampling=Resampling.bilinear, src_nodata=None, dst_nodata=None)
+              resampling=method, src_nodata=None, dst_nodata=None)
     return out, dst_transform
