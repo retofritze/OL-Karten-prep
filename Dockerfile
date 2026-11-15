@@ -10,12 +10,20 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     # public website: no OSM editing API as fallback for Overpass (OSM usage policy)
     OLPREP_OSM_API_ERSATZ=0
 
+# rasterio's bundled GDAL needs the system's expat library (missing in the slim image)
+RUN apt-get update && apt-get install -y --no-install-recommends libexpat1 \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY requirements-cloud.txt ./
-RUN pip install --no-cache-dir -r requirements-cloud.txt
+RUN pip install --no-cache-dir --root-user-action=ignore -r requirements-cloud.txt
 
 COPY src ./src
 COPY api ./api
 ENV PYTHONPATH=/app/src
+
+# fail the build (not the start in the cloud) if a module cannot be imported
+RUN python -c "import rasterio, pyproj, olprep.auftrag, api.main, api.job, api.cloud; \
+from google.cloud import firestore, storage, run_v2; print('imports ok', rasterio.__gdal_version__)"
 
 CMD exec uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8080}
