@@ -80,14 +80,14 @@ class CloudRunStarter:
         self._run_v2 = run_v2
         self._client = run_v2.JobsClient()
         self._name = f"projects/{projekt}/locations/{region}/jobs/{job}"
-        self._container: str | None = None
 
     def starten(self, auftrag_id):
         run_v2 = self._run_v2
-        if self._container is None:     # overrides name the container of the job
-            self._container = self._client.get_job(name=self._name).template.template.containers[0].name
+        # The job has one unnamed container: an override without a name applies to it (as with
+        # "gcloud run jobs execute --update-env-vars"). Reading the job to look up a name would
+        # need the extra permission run.jobs.get, which roles/run.jobsExecutorWithOverrides lacks.
         override = run_v2.RunJobRequest.Overrides.ContainerOverride(
-            name=self._container, env=[run_v2.EnvVar(name="AUFTRAG_ID", value=auftrag_id)])
+            env=[run_v2.EnvVar(name="AUFTRAG_ID", value=auftrag_id)])
         # returns a long-running operation at once; the job runs on without us
         self._client.run_job(request=run_v2.RunJobRequest(
             name=self._name, overrides=run_v2.RunJobRequest.Overrides(container_overrides=[override])))
