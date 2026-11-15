@@ -1,4 +1,4 @@
-# Shared settings of the deploy scripts (no secrets in here: the repository is public).
+﻿# Shared settings of the deploy scripts (no secrets in here: the repository is public).
 $PROJEKT = "ol-karten-prep"
 $REGION  = "europe-west1"                      # decision 23
 $BUCKET  = "ol-karten-prep-ergebnisse"         # ZIPs, deleted after 1 day

@@ -1,4 +1,4 @@
-# Build the container and deploy job, service and Firebase Hosting (each new version).
+﻿# Build the container and deploy job, service and Firebase Hosting (each new version).
 #   powershell -ExecutionPolicy Bypass -File deploy\hochladen.ps1
 # Run the tests before (pytest; after larger changes also pytest -m netz).
 

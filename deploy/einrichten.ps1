@@ -1,4 +1,4 @@
-# One-time setup of the Google Cloud project for OL-Karten-prep (project.md, decisions 18, 21-23).
+﻿# One-time setup of the Google Cloud project for OL-Karten-prep (project.md, decisions 18, 21-23).
 # Idempotent where possible: steps that already exist report an error and can be ignored.
 # Prerequisites: gcloud auth login, billing (Blaze) enabled.
 #   powershell -ExecutionPolicy Bypass -File deploy\einrichten.ps1
