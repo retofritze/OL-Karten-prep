@@ -1384,3 +1384,5 @@ Das Programm ist online: **<https://ol-karten-prep.web.app>**. Dort liegt die Pr
 **Doku:** `project.md` (Entscheidung 24, Schritt 10 erledigt), `datenquellen.md` (Tabelle „Namensnennung“), Projektübersicht („Lizenztext ändern“ abgehakt).
 
 Die Datei `Lizenztext_QUELLEN.txt` liegt weiter im Projektordner und ist nicht im Repository.
+
+**Nachtrag Hochladen:** Container, Job und API-Service sind mit dem neuen Text in der Cloud. Ein Testauftrag über <https://ol-karten-prep.web.app> ergab den neuen Text in `QUELLEN.txt`. Die Projektübersicht ließ sich nicht hochladen, weil die Firebase-Anmeldung abgelaufen war. Nach `firebase login --reauth` durch den Benutzer: `firebase deploy --only hosting`. Außerdem ist der Firebase-Zwischenspeicher `.firebase/` jetzt in `.gitignore` und nicht mehr im Repository.
