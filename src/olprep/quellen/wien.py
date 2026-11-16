@@ -11,7 +11,6 @@ from shapely.geometry import box, shape
 from .netz import USER_AGENT
 
 WFS = "https://data.wien.gv.at/daten/geo"
-ATTR_WIEN = "Höhenlinien: Stadt Wien – data.wien.gv.at (CC BY 4.0)"
 
 
 def _wfs(type_name: str, bbox: tuple[float, float, float, float] | None = None) -> dict:

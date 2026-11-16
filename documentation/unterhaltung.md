@@ -1341,3 +1341,46 @@ Das Programm ist online: **<https://ol-karten-prep.web.app>**. Dort liegt die Pr
 **`project.md`:** Budget-Warnung als eingerichtet vermerkt. Die zwei neuen Aufgaben stehen als Schritte 9 und 10 unter „Nächste Schritte“.
 - **Hinweis zum Service-Log:** Eine IP-Adresse ist nach DSGVO ein personenbezogenes Datum. Vor dem Einbau sollten Zweck, Aufbewahrungsdauer (z. B. 30 Tage) und ein Hinweis auf der Website festgelegt werden.
 - **Rückfrage zum Lizenztext:** Gemeint ist entweder der Lizenzhinweis in `QUELLEN.txt` bzw. in den Kartennotizen, die Lizenz des Projekts (GPL-3.0) oder der Hinweis auf der Projektübersicht.
+
+---
+
+## 38 · 2026-11-16 · Neuer Quellen- und Lizenztext
+
+### Prompt
+
+> Tausche den Text in QUELLEN.txt und in OOM gegen den text in OL-Karten-prep/Lizenztext_QUELLEN.txt aus. den Ersten Absatz aus dem alten Text lässt du, aber schreibe bitte die Abkürzungen aus.
+
+### Ergebnis
+
+`QUELLEN.txt` und die Kartennotizen in OOM haben den neuen Text. Er ist lokal und online aktiv.
+
+**Erster Absatz** (Angaben zur Karte) bleibt, alle Abkürzungen sind ausgeschrieben:
+- WGS84 → World Geodetic System 1984
+- EPSG:31256 → Gauß-Krüger Österreich Ost (Mittelmeridian 16°20′ östlich von Greenwich, Datum des Militärgeographischen Instituts; Code 31256 der European Petroleum Survey Group)
+- WMM → World Magnetic Model
+- BEV ALS → Geländemodell des Bundesamts für Eich- und Vermessungswesen (Airborne Laserscanning)
+- EVRF2000 → European Vertical Reference Frame 2000
+- OOM → OpenOrienteering Mapper
+- Symbolsätze mit vollem Namen, z. B. „ISSprOM 2019 (International Specification for Sprint Orienteering Maps)“
+- W/S/O/N → West/Süd/Ost/Nord, „ü. Adria“ → „über Adria“
+
+**Danach dein neuer Text:** „Datenquellen:“, „Der Text muss auf der Karte stehen:“ mit den Zeilen „Datenquelle: …“ und zum Schluss „Keine Gewähr auf rechtliche Angaben!“.
+
+**Den Hinweis zur Wien-Zeile** setzt das Programm um, statt ihn in die Datei zu schreiben. Es erscheinen nur die Quellen, die wirklich verwendet wurden. Die Wien-Zeile steht nur da, wenn Daten der Stadt Wien verwendet wurden, und auch dann nur einmal.
+
+**Kleine Abweichungen von der Vorlage** (bitte prüfen, ich ändere sie gern zurück):
+- Rechtschreibung: „vorplatzierte“, „Eich- und Vermessungswesen“, „OpenStreetMap“ in einem Wort, „OpenStreetMap-Mitwirkende“ mit Bindestrich.
+- Bei „Höhenlinien in Wien“ fehlte die Quelle. Ergänzt: „Stadt Wien“.
+- Neu: eine Zeile für das Orthofoto der Stadt Wien. In Wien und 1–2 km um Wien herum kommt das Orthofoto von der Stadt Wien, nicht von basemap.at, und die Vorlage hatte dafür keine Zeile.
+- Die Klammer beim Geländemodell sagt jetzt, was wirklich daraus gerechnet wurde: „Höhenlinien und Schummerung“ oder nur „Schummerung“, wenn die Höhenlinien von der Stadt Wien kommen. In der Vorlage stand „Höhenlinien außerhalb von Wien daraus gerechnet“. Das stimmt nicht immer, denn bei 2,5 m Äquidistanz rechnet das Programm auch in Wien selbst.
+
+**Code:** Der ganze Text steht jetzt an einer Stelle (`ausgabe/kartenordner.py`). Die alten, verstreuten Quellenangaben sind entfernt.
+
+**Geprüft:**
+- 3 neue Tests für den Text, insgesamt 103.
+- Im Referenzkarten-Test unterscheidet sich nur der Quellentext. Karte, Objekte und Dateien sind gleich. Die Referenz ist deshalb neu geschrieben.
+- Der Test prüft jetzt auch, dass der erste Absatz keine der alten Abkürzungen mehr enthält.
+
+**Doku:** `project.md` (Entscheidung 24, Schritt 10 erledigt), `datenquellen.md` (Tabelle „Namensnennung“), Projektübersicht („Lizenztext ändern“ abgehakt).
+
+Die Datei `Lizenztext_QUELLEN.txt` liegt weiter im Projektordner und ist nicht im Repository.

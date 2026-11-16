@@ -22,13 +22,12 @@ from .ausgabe.bilder import save_jpg
 from .ausgabe.kartenordner import DATA_DIR, sources_text, write_zip
 from .ausgabe.omap import OmapDocument
 from .quellen import osm as osm_quelle
-from .quellen.gelaende import ATTR_BEV
-from .quellen.orthofoto import orthofoto
-from .ressourcen import CRT_FILES, SYMBOL_SETS, default_symbol_set, symbol_set_file
+from .quellen.orthofoto import WIEN, orthofoto
+from .ressourcen import CRT_FILES, SYMBOL_SETS, SYMBOLSATZ_TITEL, default_symbol_set, symbol_set_file
 from .verarbeitung import osm as osm_zuordnung
-from .verarbeitung.georef import Georeferencing, gk_epsg
+from .verarbeitung.georef import Georeferencing, gk_epsg, gk_name
 from .verarbeitung.hoehenlinien import contours
-from .verarbeitung.schummerung import ATTRIBUTION as HILLSHADE_ATTRIBUTION, hillshade
+from .verarbeitung.schummerung import hillshade
 
 MARGIN_M = 50                   # extra orthophoto and contours around the requested area
 
@@ -169,11 +168,10 @@ def ausfuehren(auftrag: Auftrag, ziel: Path, melde: Melde = _quiet, mit_zip: boo
         if len(points) >= 2:
             doc.add_line("102" if c.index else "101", points, closed=closed)
 
-    if cont.attribution == ATTR_BEV:            # one BEV line for contours and hillshade
-        attributions = [foto.source.attribution, ATTR_BEV.replace(
-            "(Höhenlinien selbst berechnet)", "(Höhenlinien selbst berechnet, Schummerung)")]
-    else:
-        attributions = [foto.source.attribution, cont.attribution, HILLSHADE_ATTRIBUTION]
+    # data sources used (texts in ausgabe/kartenordner.py); the hillshade always comes from BEV
+    quellen = {"wien_orthofoto" if foto.source.key == WIEN.key else "basemap", "bev"}
+    if cont.quelle == "wien":
+        quellen.add("wien_hoehenlinien")
 
     osm_note = "OpenStreetMap: nicht importiert."
     total = 0
@@ -190,22 +188,27 @@ def ausfuehren(auftrag: Auftrag, ziel: Path, melde: Melde = _quiet, mit_zip: boo
         print(f"  OpenStreetMap: {len(data['elements'])} Elemente geladen, {total} Objekte übernommen")
         for symbol, n in sorted(counts.items(), key=lambda kv: -kv[1]):
             print(f"    {n:5d}  {symbol}")
-        osm_note = (f"OpenStreetMap: {total} Objekte, zugeordnet mit der OOM-Tabelle "
-                    f"{CRT_FILES[a.symbolsatz]}. Rohdaten in {DATA_DIR}/osm.json.")
-        attributions.append(osm_quelle.ATTRIBUTION)
+        osm_note = (f"OpenStreetMap: {total} Objekte, zugeordnet mit der Tabelle "
+                    f"{CRT_FILES[a.symbolsatz]} aus OpenOrienteering Mapper. "
+                    f"Rohdaten in {DATA_DIR}/osm.json.")
+        quellen.add("osm")
     elif a.osm:
         print(f"  OpenStreetMap: keine Zuordnungstabelle für {a.symbolsatz}, übersprungen")
 
     melde("Karte speichern", 90)
+    # first paragraph: facts about the map, abbreviations written out (user, 2026-11-16)
     sources = sources_text([
         f"Erstellt mit OL-Karten-prep am {date.today().isoformat()}.",
-        f"Bereich (WGS84): W {west} S {south} O {east} N {north}",
-        f"Symbolsatz {a.symbolsatz}, Maßstab 1:{a.massstab}",
-        f"Koordinatensystem EPSG:{epsg}, Deklination {g.declination}° (WMM, Stichtag Erstellung)",
+        f"Bereich (geografische Länge und Breite im World Geodetic System 1984): "
+        f"West {west}, Süd {south}, Ost {east}, Nord {north}",
+        f"Symbolsatz {a.symbolsatz} ({SYMBOLSATZ_TITEL[a.symbolsatz]}), Maßstab 1:{a.massstab}",
+        f"Koordinatensystem {gk_name(epsg)}, Deklination {g.declination}° "
+        f"(World Magnetic Model, Stichtag ist das Erstellungsdatum)",
         cont.note,
-        "Schummerung (Vorlage, anfangs ausgeblendet): aus dem BEV-Geländemodell, Licht von Nordwesten.",
+        "Schummerung (Vorlage, anfangs ausgeblendet): aus dem Geländemodell des Bundesamts für "
+        "Eich- und Vermessungswesen, Licht von Nordwesten.",
         osm_note,
-    ], attributions, with_osm_license=osm_quelle.ATTRIBUTION in attributions)
+    ], quellen, hoehenlinien_aus_bev=cont.quelle == "bev")
     doc.set_notes(sources)
     (out_dir / "QUELLEN.txt").write_text(sources + "\n", encoding="utf-8")
 

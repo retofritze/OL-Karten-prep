@@ -24,6 +24,22 @@ def gk_epsg(lon: float) -> int:
     return 31256
 
 
+# Written-out names of the three zones (for QUELLEN.txt): MGI / Austria GK West, Central, East
+_GK_ZONEN = {
+    31254: ("West", "10°20′"),
+    31255: ("Mitte", "13°20′"),
+    31256: ("Ost", "16°20′"),
+}
+
+
+def gk_name(epsg: int) -> str:
+    """E.g. 'Gauß-Krüger Österreich Ost (Mittelmeridian 16°20′ östlich von Greenwich, Datum des
+    Militärgeographischen Instituts; Code 31256 der European Petroleum Survey Group)'."""
+    zone, meridian = _GK_ZONEN[epsg]
+    return (f"Gauß-Krüger Österreich {zone} (Mittelmeridian {meridian} östlich von Greenwich, "
+            f"Datum des Militärgeographischen Instituts; Code {epsg} der European Petroleum Survey Group)")
+
+
 def decimal_year(d: date) -> float:
     start = date(d.year, 1, 1)
     length = (date(d.year + 1, 1, 1) - start).days

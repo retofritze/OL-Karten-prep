@@ -168,16 +168,21 @@ bekommt einfach den Streifen ihrer Mitte. Der kleine Zusatzfehler dabei ist laut
 
 ## Namensnennung (für jede erzeugte Karte)
 
-Das Programm schreibt die Quellen in eine Textdatei im Ergebnisordner und in die Kartennotizen (`<notes>`) der `.omap`:
+Das Programm schreibt die Quellen in `QUELLEN.txt` im Ergebnisordner und in die Kartennotizen
+(`<notes>`) der `.omap`. Text seit 2026-11-16 nach Vorgabe des Benutzers (Code:
+`ausgabe/kartenordner.py`, `QUELLEN`). Es erscheinen nur die tatsächlich verwendeten Quellen:
 
-- Orthofoto Wien: „Datenquelle: Stadt Wien – data.wien.gv.at“ (CC BY 4.0)
-- Orthofoto sonst: „Datenquelle: basemap.at“ (CC BY 4.0)
-- Höhenlinien Wien: „Datenquelle: Stadt Wien – data.wien.gv.at“ (CC BY 4.0)
-- Geländemodell (selbst gerechnete Höhenlinien, Schummerung): „Datenquelle: BEV“ (CC BY 4.0)
-- OSM: „© OpenStreetMap-Mitwirkende“ (ODbL)
+| Quelle | Eintrag unter „Datenquellen:“ | Zeile, die auf der Karte stehen muss |
+|---|---|---|
+| Orthofoto basemap.at | Orthofoto: basemap.at (CC BY 4.0; basemap.at; Lizenz-Link) | Datenquelle: basemap.at |
+| Orthofoto Wien | Orthofoto: Stadt Wien (CC BY 4.0; data.wien.gv.at; Lizenz-Link) | Datenquelle: Stadt Wien - data.wien.gv.at |
+| BEV-Geländemodell (immer, wegen der Schummerung) | Geländemodell (Höhenlinien und Schummerung bzw. nur Schummerung daraus gerechnet): Bundesamt für Eich- und Vermessungswesen (CC BY 4.0; https://www.bev.gv.at/public.html; Lizenz-Link) | Datenquelle: bev.gv.at/public.html |
+| Höhenlinien Wien | Höhenlinien in Wien: Stadt Wien (CC BY 4.0; data.wien.gv.at; Lizenz-Link) | Datenquelle: Stadt Wien - data.wien.gv.at |
+| OpenStreetMap | Schon vorplatzierte Symbole: OpenStreetMap (ODbL; openstreetmap.org; ODbL-Link) | Datenquelle: openstreetmap.org / OpenStreetMap-Mitwirkende |
 
-Dazu kommt ein Hinweis, dass die Quellen auf der fertigen Karte stehen müssen (CC BY 4.0
-und ODbL verlangen Namensnennung).
+Reihenfolge der Kartenzeilen: basemap.at, OpenStreetMap, BEV, Stadt Wien (die Wien-Zeile nur,
+wenn Wiener Daten verwendet wurden, und nur einmal). Schlusszeile: „Keine Gewähr auf rechtliche
+Angaben!“. Der erste Absatz (Angaben zur Karte) schreibt alle Abkürzungen aus.
 
 ## Offen
 

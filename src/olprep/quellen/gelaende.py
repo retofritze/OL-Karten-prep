@@ -22,8 +22,6 @@ BEV_DATE = "20250915"           # newest "Stichtag" of the BEV ALS-DTM (checked 
 BEV_TILE = 50_000
 PAD_M = 30                      # extra DTM around the area against smoothing edge effects
 
-ATTR_BEV = "Geländemodell (Höhenlinien selbst berechnet): BEV – Bundesamt für Eich- und Vermessungswesen (CC BY 4.0)"
-
 
 def _read_dtm(epsg: int, bounds: tuple[float, float, float, float]) -> tuple[np.ndarray, rasterio.Affine]:
     """1 m DTM for bounds (map CRS), assembled from the BEV COG tiles by range requests."""

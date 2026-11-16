@@ -13,13 +13,11 @@ import numpy as np
 import rasterio
 from scipy.ndimage import gaussian_filter
 
-from ..quellen.gelaende import ATTR_BEV, dtm_for
+from ..quellen.gelaende import dtm_for
 
 AZIMUTH = 315.0
 ALTITUDE = 45.0
 SMOOTH_PX = 1.0             # light smoothing against single-pixel noise of the 1 m DTM
-
-ATTRIBUTION = ATTR_BEV.replace("(Höhenlinien selbst berechnet)", "(Schummerung)")
 
 
 def hillshade(epsg: int, bounds: tuple[float, float, float, float]) -> tuple[np.ndarray, rasterio.Affine]:

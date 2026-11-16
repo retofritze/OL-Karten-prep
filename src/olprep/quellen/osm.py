@@ -15,7 +15,6 @@ from .netz import USER_AGENT
 
 OVERPASS = ("https://overpass-api.de/api/interpreter",)
 OSM_API = "https://api.openstreetmap.org/api/0.6"
-ATTRIBUTION = "Wege, Gebäude u. a.: © OpenStreetMap-Mitwirkende (ODbL)"
 
 
 class OsmNichtErreichbar(RuntimeError):

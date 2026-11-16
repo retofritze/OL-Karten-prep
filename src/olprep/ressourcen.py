@@ -23,6 +23,14 @@ SYMBOL_SETS = {
 }
 SCALES = sorted({s for scales in SYMBOL_SETS.values() for s in scales})
 
+# Full names of the IOF specifications behind the symbol sets (for QUELLEN.txt)
+SYMBOLSATZ_TITEL = {
+    "ISSprOM 2019": "International Specification for Sprint Orienteering Maps",
+    "ISOM 2017-2": "International Specification for Orienteering Maps",
+    "ISMTBOM": "International Specification for Mountain Bike Orienteering Maps",
+    "ISSkiOM 2019": "International Specification for Ski Orienteering Maps",
+}
+
 # Symbol set -> OSM cross-reference table shipped with OOM 0.9.6 (none for ISMTBOM)
 CRT_FILES = {
     "ISSprOM 2019": "OSM-ISSprOM 2019.crt",

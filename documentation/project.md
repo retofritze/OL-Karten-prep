@@ -298,6 +298,16 @@ JPG + `.jgw` gespeichert, als Koordinatensystem dient der GK-Streifen der Karten
     Laufzeit eines Auftrags (Minuten) überwiegt die Netzlaufzeit bei Weitem, günstigere
     Preisstufe als Frankfurt/Zürich, Weiterleitung von Firebase Hosting möglich (beim
     Einrichten in der aktuellen Doku prüfen).
+24. **Quellen- und Lizenztext** (2026-11-16, Vorlage des Benutzers): `QUELLEN.txt` und
+    Kartennotizen beginnen mit den Angaben zur Karte (alle Abkürzungen ausgeschrieben, z. B.
+    „World Geodetic System 1984“, „Gauß-Krüger Österreich Ost … European Petroleum Survey Group“,
+    „World Magnetic Model“, „Bundesamt für Eich- und Vermessungswesen“). Danach „Datenquellen:“
+    mit Lizenz und Link je Quelle, die Zeilen, die auf der Karte stehen müssen, und „Keine Gewähr
+    auf rechtliche Angaben!“. Nur verwendete Quellen erscheinen; die Wien-Zeile nur bei Wiener
+    Daten. Gegenüber der Vorlage korrigiert: „vorplatzierte“, „Eich- und Vermessungswesen“,
+    „OpenStreetMap“ (zusammen), „OpenStreetMap-Mitwirkende“ (mit Bindestrich), bei den Wiener
+    Höhenlinien „Stadt Wien“ als Quelle ergänzt, Orthofoto der Stadt Wien ergänzt, Klammer beim
+    Geländemodell je nach Herkunft der Höhenlinien. Details: datenquellen.md („Namensnennung“).
 
 ## Ablauf auf der Website (Vorgabe 2026-11-02)
 
@@ -506,7 +516,7 @@ gcloud auth login
 **Tests** (pytest, Einstellungen in `pytest.ini`, Stand 2026-11-15: pytest 9.2.0):
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest            # 100 schnelle Tests ohne Internet, ca. 10 s
+.\.venv\Scripts\python.exe -m pytest            # 103 schnelle Tests ohne Internet, ca. 10 s
 .\.venv\Scripts\python.exe -m pytest -m netz    # Referenzkarte, mit Internet, 15 s bis 1 min
 .\.venv\Scripts\python.exe -m pyflakes src scripts tests   # ungenutzte Importe u. Ä.
 ```
@@ -600,9 +610,9 @@ Testkarten stammen noch aus der Zeit vor der Auflösung nach Maßstab.
    Datenschutz beachten: Eine IP-Adresse ist nach DSGVO ein personenbezogenes Datum. Vorher
    festlegen: Zweck, Aufbewahrungsdauer (z. B. 30 Tage, danach löschen oder IP kürzen) und ein
    Hinweis auf der Website (Datenschutzerklärung).
-10. **Lizenztext ändern** (Vorgabe 2026-11-15). Noch zu klären, welcher Text gemeint ist:
-    Lizenzhinweis in `QUELLEN.txt`/Kartennotizen, Lizenz des Projekts (GPL-3.0) oder Hinweis
-    auf der Projektübersicht.
+10. ✅ **Lizenztext geändert** (2026-11-16): Text in `QUELLEN.txt` und in den Kartennotizen
+    nach der Vorlage des Benutzers, siehe Entscheidung 24 und datenquellen.md
+    („Namensnennung“).
 
 ## Offene Fragen
 

@@ -43,17 +43,15 @@ class TileSource:
     title: str
     url: str            # {z} {y} {x}
     max_zoom: int       # highest zoom with real detail (see datenquellen.md)
-    attribution: str
+    # licence texts of the sources: ausgabe/kartenordner.py (QUELLEN)
 
 
 WIEN = TileSource(
     "wien_lb", "Orthofoto Stadt Wien (aktueller Jahrgang)",
-    "https://mapsneu.wien.gv.at/wmts/lb/farbe/google3857/{z}/{y}/{x}.jpeg",
-    20, "Orthofoto: Stadt Wien – data.wien.gv.at (CC BY 4.0)")
+    "https://mapsneu.wien.gv.at/wmts/lb/farbe/google3857/{z}/{y}/{x}.jpeg", 20)
 BASEMAP = TileSource(
     "basemap", "basemap.at Orthofoto",
-    "https://mapsneu.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg",
-    20, "Orthofoto: basemap.at (CC BY 4.0)")
+    "https://mapsneu.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg", 20)
 SOURCES = (WIEN, BASEMAP)       # in order of preference
 
 

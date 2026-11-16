@@ -115,6 +115,10 @@ def test_reference_map_unchanged(tmp_path, monkeypatch):
         assert sorted(z.namelist()) == [f"{NAME}/{f}" for f in actual["dateien"]]
     # OSM features imported (one feature can give several map objects, e.g. a multipolygon)
     assert any(ln.startswith(f"OpenStreetMap: {ergebnis.osm_objekte} Objekte") for ln in actual["quellen"])
+    # first paragraph of QUELLEN.txt: abbreviations written out (user, 2026-11-16)
+    first_paragraph = "\n".join(actual["quellen"][:actual["quellen"].index("")])
+    for abbreviation in ("WGS84", "EPSG", "WMM", "OOM", "BEV", "ALS", "EVRF", "ü."):
+        assert abbreviation not in first_paragraph, abbreviation
 
     if os.environ.get("OLPREP_REFERENZ_NEU") == "1" or not REFERENCE.exists():
         REFERENCE.parent.mkdir(exist_ok=True)

@@ -19,8 +19,7 @@ from shapely.geometry import LineString, box
 from shapely.ops import linemerge
 
 from ..quellen import wien
-from ..quellen.gelaende import ATTR_BEV, BEV_DATE, dtm_for
-from ..quellen.wien import ATTR_WIEN
+from ..quellen.gelaende import BEV_DATE, dtm_for
 
 # Generalisation, in mm on paper (scaled with the map scale)
 SMOOTH_MM = 0.3                 # Gaussian sigma applied to the DTM
@@ -38,7 +37,7 @@ class Contour:
 @dataclass
 class ContourResult:
     contours: list[Contour]
-    attribution: str
+    quelle: str             # "wien" (ready-made lines) or "bev" (computed from the DTM)
     note: str               # how the lines were made, for QUELLEN.txt
 
 
@@ -71,9 +70,9 @@ def _wien(bounds, interval, index_interval, scale) -> ContourResult:
         for line in _finish(merged, bounds, scale):
             result.append(Contour(line, float(level), _is_multiple(level, index_interval)))
     print(f"  Höhenlinien Stadt Wien: {len(result)} Linien, {interval:g} m, Zählkurve {index_interval:g} m")
-    return ContourResult(result, ATTR_WIEN,
+    return ContourResult(result, "wien",
                          f"Höhenlinien {interval:g} m, Zählkurven {index_interval:g} m, fertige Linien der "
-                         f"Stadt Wien. Höhen über Wiener Null (= 156,68 m ü. Adria).")
+                         f"Stadt Wien. Höhen über Wiener Null (= 156,68 m über Adria).")
 
 
 # --- computed from the BEV ALS-DTM -------------------------------------------
@@ -110,10 +109,12 @@ def _from_dtm(epsg, bounds, interval, index_interval, scale) -> ContourResult:
                 result.append(Contour(line, level, _is_multiple(level, index_interval)))
     print(f"  Höhenlinien berechnet: {len(result)} Linien, {interval:g} m, Zählkurve {index_interval:g} m, "
           f"Höhen {lo:.0f}–{hi:.0f} m")
-    return ContourResult(result, ATTR_BEV,
+    return ContourResult(result, "bev",
                          f"Höhenlinien {interval:g} m, Zählkurven {index_interval:g} m, selbst berechnet "
-                         f"aus dem BEV ALS-Geländemodell 1 m (Stichtag {BEV_DATE[:4]}-{BEV_DATE[4:6]}-"
-                         f"{BEV_DATE[6:]}), geglättet. Höhen über Adria (EVRF2000).")
+                         f"aus dem Geländemodell des Bundesamts für Eich- und Vermessungswesen "
+                         f"(Airborne Laserscanning, Raster 1 m, Stichtag {BEV_DATE[:4]}-{BEV_DATE[4:6]}-"
+                         f"{BEV_DATE[6:]}), geglättet. Höhen über Adria "
+                         f"(European Vertical Reference Frame 2000).")
 
 
 # --- common ------------------------------------------------------------------
